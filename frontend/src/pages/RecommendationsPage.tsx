@@ -13,7 +13,6 @@ import { demoUserId } from '@/config/runtime'
 import { eventService } from '@/services/eventService'
 import { feedbackService } from '@/services/feedbackService'
 import { groupService } from '@/services/groupService'
-import { profileService } from '@/services/profileService'
 import { recommendationService } from '@/services/recommendationService'
 import type { Event, Group, Recommendation } from '@/types'
 
@@ -21,7 +20,7 @@ type FeedFilter = 'all' | 'communities' | 'events'
 
 export function RecommendationsPage() {
   const recommendationsQuery = useQuery({ queryKey: ['recommendation-feed', demoUserId], queryFn: recommendationService.list })
-  const profileQuery = useQuery({ queryKey: ['recommendation-profile', demoUserId], queryFn: profileService.getProfile })
+  const profileQuery = useQuery({ queryKey: ['recommendation-profile', demoUserId], queryFn: recommendationService.getInterestProfile })
   const groupsQuery = useQuery({ queryKey: ['recommendation-groups'], queryFn: groupService.list })
   const eventsQuery = useQuery({ queryKey: ['recommendation-events'], queryFn: eventService.list })
   const [filter, setFilter] = useState<FeedFilter>('all')

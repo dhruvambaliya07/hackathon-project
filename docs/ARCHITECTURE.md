@@ -15,15 +15,17 @@ Routes receive a request, resolve a session/service dependency, call one service
 
 ## End-to-end flow
 
-1. The client submits a user ID and free-form interest text.
+1. Discover submits free-form interest text to `POST /api/v1/interests/analyze` and stores the structured profile in the client session storage.
 2. The AI service returns validated structured interests, goals, and traits, or keyword fallback output.
-3. Recognized interests are persisted with bounded weights.
+3. Recommendations reads that profile and submits one backend ranking request with the stable demo user ID.
 4. One embedding is generated; the provider has a deterministic fallback.
 5. PostgreSQL retrieves bounded group and event candidate sets; structured interest matching is the required baseline.
 6. Local matching calculates semantic, interest, goal, and event relevance signals.
 7. Candidates are ranked and stored as recommendation records.
-8. The client opens the target, requests an icebreaker, and submits feedback using the recommendation ID.
+8. The client opens a group or event target, requests one icebreaker on demand, and submits feedback using the recommendation ID.
 9. Feedback updates profile state and bounded relevant interest weights.
+
+The frontend uses React Query for server state and a centralized API client in API mode. Mock services remain available when `VITE_API_MODE` is not `api`; API mode does not synthesize catalog or recommendation data.
 
 ## Lifecycle and boundaries
 

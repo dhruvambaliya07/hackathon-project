@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { Check, Clipboard, LoaderCircle, MessageCircle, RefreshCw, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { icebreakerService } from '@/services/icebreakerService'
-import type { Icebreaker, IcebreakerRequest, IcebreakerStyle } from '@/types'
+import type { Icebreaker, IcebreakerStyle } from '@/types'
 import { demoUserId } from '@/config/runtime'
 import { useLocation, useParams } from 'react-router-dom'
 
@@ -23,32 +24,34 @@ export function IcebreakerDialog({ open, onClose, interests, community, event, t
   const resolvedTargetType = targetType ?? (location.pathname.startsWith('/events/') ? 'event' : 'group')
   const resolvedTargetId = targetId ?? routeParams.id
   const [style, setStyle] = useState<IcebreakerStyle>('friendly')
-  const [icebreaker, setIcebreaker] = useState<Icebreaker | null>(null)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [error, setError] = useState('')
+  const [copyError, setCopyError] = useState('')
   const [copied, setCopied] = useState(false)
+  const generationMutation = useMutation({
+    mutationFn: (nextStyle: IcebreakerStyle) => icebreakerService.generate({ interests, community, event, style: nextStyle, userId: demoUserId, targetType: resolvedTargetType, targetId: resolvedTargetId }),
+  })
+  const icebreaker: Icebreaker | null = generationMutation.data ?? null
+  const isGenerating = generationMutation.isPending
+  const error = copyError || (generationMutation.error instanceof Error ? generationMutation.error.message : generationMutation.error ? 'We could not generate a starter right now.' : '')
 
   useEffect(() => {
     if (!open) return undefined
     const handleKeyDown = (keyboardEvent: KeyboardEvent) => { if (keyboardEvent.key === 'Escape') onClose() }
     window.addEventListener('keydown', handleKeyDown)
-    void generate('friendly')
+    generationMutation.mutate('friendly')
     window.setTimeout(() => document.querySelector<HTMLButtonElement>('[aria-label="Close conversation starter"]')?.focus(), 0)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [open])
 
   async function generate(nextStyle: IcebreakerStyle = style) {
     setStyle(nextStyle)
-    setIsGenerating(true)
-    setError('')
+    setCopyError('')
     setCopied(false)
-    const request: IcebreakerRequest = { interests, community, event, style: nextStyle, userId: demoUserId, targetType: resolvedTargetType, targetId: resolvedTargetId }
-    try { setIcebreaker(await icebreakerService.generate(request)) } catch (generationError) { setError(generationError instanceof Error ? generationError.message : 'We could not generate a starter right now.') } finally { setIsGenerating(false) }
+    generationMutation.mutate(nextStyle)
   }
 
   async function copyIcebreaker() {
     if (!icebreaker) return
-    try { await navigator.clipboard.writeText(icebreaker.text); setCopied(true); window.setTimeout(() => setCopied(false), 1800) } catch { setError('Copy was blocked by your browser. You can still select the text manually.') }
+    try { await navigator.clipboard.writeText(icebreaker.text); setCopied(true); window.setTimeout(() => setCopied(false), 1800) } catch { setCopyError('Copy was blocked by your browser. You can still select the text manually.') }
   }
 
   if (!open) return null

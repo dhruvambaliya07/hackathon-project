@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { AlertCircle, ArrowLeft, ArrowRight, Check, ChevronRight, CircleHelp, LoaderCircle, RefreshCw, Sparkles, Target, Users, WandSparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -28,6 +29,7 @@ export function DiscoverPage() {
   const [profile, setProfile] = useState<InterestProfile | null>(null)
   const [error, setError] = useState('')
   const [manualInterests, setManualInterests] = useState<string[]>([])
+  const analyzeMutation = useMutation({ mutationFn: (text: string) => interestService.analyze(text) })
 
   useEffect(() => {
     if (stage !== 'analyzing') return undefined
@@ -42,7 +44,7 @@ export function DiscoverPage() {
     setAnalysisStep(0)
     setError('')
     try {
-      const result = await interestService.analyze(description)
+      const result = await analyzeMutation.mutateAsync(description)
       setProfile(result)
       setStage('profile')
     } catch (analysisError) {
