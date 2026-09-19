@@ -45,6 +45,8 @@ export interface Group {
   accent: 'coral' | 'mint' | 'sun' | 'sky'
   tags: string[]
   nextEvent?: string
+  location?: string
+  activities?: string[]
 }
 
 export interface Event {

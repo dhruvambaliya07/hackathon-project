@@ -1,9 +1,41 @@
-import { SlidersHorizontal } from 'lucide-react'
-import { PageContainer } from '@/components/common/page-container'
-import { PageHeader } from '@/components/common/page-header'
-import { GroupCard } from '@/components/common/group-card'
+import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { ChevronDown, Search, SlidersHorizontal, Users } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useGroups } from '@/hooks/useApi'
-import { LoadingState, ErrorState, EmptyState } from '@/components/common/states'
+import { Card } from '@/components/ui/card'
+import { EmptyState, ErrorState, LoadingState } from '@/components/common/states'
+import { GroupCard } from '@/components/common/group-card'
+import { PageContainer } from '@/components/common/page-container'
+import { groupService } from '@/services/groupService'
+import { recommendationService } from '@/services/recommendationService'
 
-export function GroupsPage() { const query = useGroups(); return <PageContainer><PageHeader eyebrow="Communities" title="Find your people" detail="Small circles, shared rituals, and room to show up exactly as you are." action={<Button variant="outline"><SlidersHorizontal size={16} /> Filter</Button>} />{query.isPending ? <LoadingState /> : query.isError ? <ErrorState onRetry={() => void query.refetch()} /> : query.data?.length ? <div className="grid gap-5 md:grid-cols-2">{query.data.map((group) => <GroupCard key={group.id} group={group} />)}</div> : <EmptyState title="No communities yet" detail="New circles are forming all the time. Check back soon." />}</PageContainer> }
+export function GroupsPage() {
+  const groupsQuery = useQuery({ queryKey: ['groups'], queryFn: groupService.list })
+  const recommendationsQuery = useQuery({ queryKey: ['recommendations-for-groups'], queryFn: recommendationService.list })
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('all')
+  const [interest, setInterest] = useState('all')
+  const [popularity, setPopularity] = useState('all')
+
+  const categories = useMemo(() => [...new Set(groupsQuery.data?.map((group) => group.category) ?? [])], [groupsQuery.data])
+  const interests = useMemo(() => [...new Set(groupsQuery.data?.flatMap((group) => group.tags) ?? [])], [groupsQuery.data])
+  const matchByGroup = useMemo(() => new Map((recommendationsQuery.data ?? []).filter((recommendation) => recommendation.type === 'group').map((recommendation) => [recommendation.targetId, recommendation])), [recommendationsQuery.data])
+  const filteredGroups = useMemo(() => groupsQuery.data?.filter((group) => {
+    const query = search.trim().toLowerCase()
+    const matchesSearch = !query || [group.name, group.category, group.description, ...group.tags].some((value) => value.toLowerCase().includes(query))
+    const matchesCategory = category === 'all' || group.category === category
+    const matchesInterest = interest === 'all' || group.tags.includes(interest)
+    const matchesPopularity = popularity === 'all' || (popularity === 'popular' && group.memberCount >= 150) || (popularity === 'growing' && group.memberCount < 150)
+    return matchesSearch && matchesCategory && matchesInterest && matchesPopularity
+  }) ?? [], [category, groupsQuery.data, interest, popularity, search])
+
+  const isLoading = groupsQuery.isPending || recommendationsQuery.isPending
+  const isError = groupsQuery.isError || recommendationsQuery.isError
+
+  return <PageContainer><div className="mx-auto max-w-7xl"><div className="mb-9 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="eyebrow mb-3 text-coral">Shared interests, real people</p><h1 className="heading text-4xl sm:text-5xl">Explore Communities</h1><p className="mt-3 max-w-xl text-sm leading-6 text-ink/55 sm:text-base">Find the circles, rituals, and conversations that make campus feel a little more yours.</p></div><Badge className="w-fit bg-mint/15 py-2 text-mint"><Users size={14} className="mr-2" /> {groupsQuery.data?.length ?? 0} active communities</Badge></div><Card className="border-ink bg-ink p-2 shadow-float"><div className="flex flex-col gap-2 rounded-xl bg-white/10 p-3 sm:flex-row sm:items-center"><Search className="ml-2 shrink-0 text-white/60" size={20} /><input value={search} onChange={(event) => setSearch(event.target.value)} aria-label="Search communities" className="min-h-12 flex-1 bg-transparent px-2 text-sm text-white outline-none placeholder:text-white/45" placeholder="Search communities..." /><Button variant="secondary" size="sm"><SlidersHorizontal size={15} /> Explore</Button></div></Card><div className="mt-5 flex flex-wrap gap-2"><FilterSelect label="Category" value={category} options={categories} onChange={setCategory} /><FilterSelect label="Interests" value={interest} options={interests} onChange={setInterest} /><FilterSelect label="Popularity" value={popularity} options={['popular', 'growing']} onChange={setPopularity} optionLabels={{ popular: 'Most popular', growing: 'Growing communities' }} /><button onClick={() => { setSearch(''); setCategory('all'); setInterest('all'); setPopularity('all') }} className="px-3 text-xs font-extrabold text-ink/40 hover:text-ink">Clear filters</button></div>{isLoading ? <div className="mt-10"><LoadingState label="Finding communities..." /></div> : isError ? <div className="mt-10"><ErrorState onRetry={() => { void groupsQuery.refetch(); void recommendationsQuery.refetch() }} /></div> : <><div className="mb-5 mt-10 flex items-center justify-between"><div><h2 className="heading text-2xl">Communities to explore</h2><p className="mt-1 text-sm text-ink/45">{filteredGroups.length} {filteredGroups.length === 1 ? 'community' : 'communities'} matching your filters</p></div></div>{filteredGroups.length ? <div className="grid gap-5 md:grid-cols-2">{filteredGroups.map((group) => { const match = matchByGroup.get(group.id); return <GroupCard key={group.id} group={group} matchScore={match?.matchScore} matchedInterests={match?.matchedInterests} /> })}</div> : <Card className="border-dashed"><EmptyState title="No communities match that search" detail="Try a broader interest or clear one of the filters to see more circles." /></Card>}</>}</div></PageContainer>
+}
+
+function FilterSelect({ label, value, options, onChange, optionLabels = {} }: { label: string; value: string; options: string[]; onChange: (value: string) => void; optionLabels?: Record<string, string> }) {
+  return <label className="relative"><span className="sr-only">{label}</span><select value={value} onChange={(event) => onChange(event.target.value)} className="h-10 appearance-none rounded-xl border border-line bg-surface px-3 pr-9 text-xs font-bold text-ink outline-none transition hover:border-ink/30 focus:border-coral"><option value="all">{label}: All</option>{options.map((option) => <option key={option} value={option}>{optionLabels[option] ?? option}</option>)}</select><ChevronDown className="pointer-events-none absolute right-3 top-3 text-ink/45" size={14} /></label>
+}
