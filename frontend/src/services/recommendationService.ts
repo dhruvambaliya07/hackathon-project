@@ -1,4 +1,5 @@
 import { events, groups, recommendations } from '@/data/mockData'
+import { profileService } from '@/services/profileService'
 import type { InterestProfile, Recommendation } from '@/types'
 
 export interface RecommendationService {
@@ -13,22 +14,6 @@ export interface RecommendationService {
 const storageKeys = {
   saved: 'aatmoday.savedRecommendations',
   interested: 'aatmoday.interestedRecommendations',
-}
-
-const interestProfile: InterestProfile = {
-  userId: 'u1',
-  prompt: 'I want to make things, meet curious people, and get better at taking photos.',
-  tags: [],
-  signals: [
-    { id: 'photography', name: 'Photography', score: 92, category: 'Creative', color: 'coral' },
-    { id: 'filmmaking', name: 'Filmmaking', score: 84, category: 'Creative', color: 'sun' },
-    { id: 'technology', name: 'Technology', score: 71, category: 'Making', color: 'sky' },
-    { id: 'events', name: 'Event Management', score: 65, category: 'Community', color: 'mint' },
-  ],
-  goals: ['Meet people', 'Learn', 'Create'],
-  traits: ['Creative', 'Collaborative', 'Curious'],
-  explanation: 'Your matches lean creative, hands-on, and social. Each score is a relevance signal based on the interests and goals in your profile, not a measure of you.',
-  updatedAt: new Date().toISOString(),
 }
 
 function readIds(key: string): string[] {
@@ -52,10 +37,16 @@ function toggleId(key: string, id: string): boolean {
 
 export const recommendationService: RecommendationService = {
   async list() {
-    return recommendations
+    const profile = await profileService.getProfile()
+    const profileInterests = new Set(profile.signals.map((signal) => signal.name.toLowerCase()))
+    return recommendations.map((recommendation) => {
+      const matchedInterests = recommendation.matchedInterests.filter((interest) => profileInterests.has(interest.toLowerCase()))
+      const relevanceShift = matchedInterests.length ? 4 : -8
+      return { ...recommendation, matchScore: Math.min(99, Math.max(55, recommendation.matchScore + relevanceShift)), matchedInterests: matchedInterests.length ? matchedInterests : recommendation.matchedInterests.slice(0, 1) }
+    })
   },
   async getInterestProfile() {
-    return interestProfile
+    return profileService.getProfile()
   },
   getSavedIds() {
     return readIds(storageKeys.saved)

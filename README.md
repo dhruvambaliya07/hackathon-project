@@ -21,6 +21,7 @@ Create a production build with `npm run build`.
 - `src/services/groupService.ts` owns community retrieval and local saved/interested state. It is the backend-ready boundary for the community directory and group detail actions.
 - `src/services/eventService.ts` owns event retrieval, local interested state, and client-side `.ics` calendar downloads. It is the backend-ready boundary for event discovery and detail actions.
 - `src/services/icebreakerService.ts` owns contextual conversation-starter generation and is prepared for `POST /api/v1/icebreakers`.
+- `src/services/profileService.ts` owns the shared interest profile and local interest persistence. Updating interests refreshes the recommendation profile and feed queries.
 - `src/hooks` exposes TanStack Query hooks for UI consumption.
 - `src/components` contains reusable primitives and feature component locations.
 - `src/pages` contains the routed discovery, recommendation, community, event, and profile experiences.
@@ -40,3 +41,5 @@ The `/groups` directory supports client-side search plus category, interest, and
 The `/events` directory supports search plus date, category, community, and location filters. `/events/:id` includes event details, matched interests, reasons to attend, community information, related events, local interested state, and an `.ics` Add to Calendar download.
 
 Icebreakers can be launched from group details, event details, and recommendation cards. The responsive dialog supports casual, friendly, and professional styles, short generation loading, regeneration, copy confirmation, keyboard Escape handling, and a mobile bottom-sheet layout.
+
+The `/profile` page shows interest strengths, goals, traits, saved communities, interested events, activity, and recent recommendations. Its edit mode adds/removes interests through `profileService`, allowing recommendation relevance and match chips to change from the same client-side profile state.
