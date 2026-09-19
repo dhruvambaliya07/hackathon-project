@@ -42,7 +42,7 @@ class RecommendationService:
         ranked: list[tuple[float, dict[str, object]]] = []
         for candidate in candidates:
             breakdown = self.matcher.score(user_embedding, user_interests, user_goals, candidate)
-            evidence = {
+            evidence: dict[str, object] = {
                 "matched_interests": breakdown.matched_interests,
                 "matched_goals": breakdown.matched_goals,
                 "event_connection": breakdown.event_connection,
@@ -59,12 +59,18 @@ class RecommendationService:
                 "score": round(breakdown.final_score, 1),
                 "matched_interests": breakdown.matched_interests,
                 "reasons": reasons,
+                "matched_goals": breakdown.matched_goals,
                 "explanation": deterministic_explanation(breakdown),
             }))
-        ranked.sort(key=lambda item: (-item[0], str(item[1]["target_id"])))
+        ranked.sort(key=lambda item: (-item[0], str(item[1]["target_type"]), str(item[1]["target_id"])))
         results: list[dict[str, object]] = []
         stored: list[tuple[Recommendation, dict[str, object]]] = []
+        seen_targets: set[tuple[str, UUID]] = set()
         for score, item in ranked[:limit]:
+            target_key = (str(item["target_type"]), item["target_id"])
+            if target_key in seen_targets:
+                continue
+            seen_targets.add(target_key)
             recommendation = Recommendation(
                 user_id=user_id,
                 target_type=str(item["target_type"]),
@@ -90,7 +96,7 @@ class RecommendationService:
         if user is None:
             raise RecommendationUserNotFound("user not found")
         interests = {link.interest.name.lower(): link.weight for link in user.interests}
-        goals = set().union(*(CATEGORY_GOALS.get(link.interest.category.lower(), frozenset()) for link in user.interests))
+        goals = set(user.goals or []) | set().union(*(CATEGORY_GOALS.get(link.interest.category.lower(), frozenset()) for link in user.interests))
         return interests, goals
 
     def _store_analysis(self, user_id: UUID | None, analysis) -> None:

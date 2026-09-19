@@ -10,6 +10,7 @@ from app.services.matching_service import (
     build_explanation_evidence,
     calculate_hybrid_score,
     cosine_similarity,
+    goal_compatibility,
     interest_overlap,
 )
 
@@ -33,6 +34,27 @@ def test_weighted_interest_overlap_returns_evidence() -> None:
     score, matches = interest_overlap({"Photography": 1.0, "Writing": 0.5}, {"photography": 0.8, "coding": 1.0})
     assert score == 0.8 / 1.5
     assert matches == ["photography"]
+
+
+def test_interest_overlap_exact_partial_empty_unknown_and_duplicates() -> None:
+    exact, exact_matches = interest_overlap({"Photography": 1.0}, {"photography": 0.5})
+    partial, partial_matches = interest_overlap({"Photography": 1.0, "Writing": 1.0}, {"photography": 1.0})
+    empty, empty_matches = interest_overlap({}, {"photography": 1.0})
+    unknown, unknown_matches = interest_overlap({"unknown": 1.0}, {"photography": 1.0})
+    duplicate, duplicate_matches = interest_overlap({"Photography": 0.4, " photography ": 0.9}, {"PHOTOGRAPHY": 1.0})
+
+    assert exact == 0.5 and exact_matches == ["photography"]
+    assert partial == 0.5 and partial_matches == ["photography"]
+    assert empty == 0.0 and empty_matches == []
+    assert unknown == 0.0 and unknown_matches == []
+    assert duplicate == 1.0 and duplicate_matches == ["photography"]
+
+
+def test_goal_matching_is_case_insensitive_and_deterministic() -> None:
+    score, matches = goal_compatibility({"Create", "unknown"}, {"create", "learn"})
+
+    assert score == 0.5
+    assert matches == ["create"]
 
 
 def test_hybrid_score_uses_default_heuristic_weights_and_normalizes() -> None:
@@ -86,7 +108,16 @@ def test_event_relevance_is_bounded_and_not_date_only() -> None:
     )
     score = MatchingService().score([1.0], {"photography": 1.0}, {"create"}, candidate)
     assert 0 <= score.event_relevance <= 1
-    assert score.event_connection == "upcoming event with matching interests"
+    assert score.event_connection == "scheduled event with matching interests"
+
+
+def test_event_score_is_repeatable_for_same_inputs() -> None:
+    candidate = Candidate("event", uuid4(), "Workshop", "", [1.0], {"photography": 1.0}, start_time=datetime(2030, 1, 1, tzinfo=timezone.utc))
+
+    first = MatchingService().score([1.0], {"photography": 1.0}, set(), candidate)
+    second = MatchingService().score([1.0], {"photography": 1.0}, set(), candidate)
+
+    assert first == second
 
 
 def test_deterministic_embedding_is_cached_by_caller_and_repeatable() -> None:

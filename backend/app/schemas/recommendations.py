@@ -19,6 +19,7 @@ class RecommendationItem(BaseModel):
     description: str
     score: float = Field(ge=0, le=100)
     matched_interests: list[str] = Field(default_factory=list)
+    matched_goals: list[str] = Field(default_factory=list)
     reasons: list[str] = Field(default_factory=list)
     explanation: str
 

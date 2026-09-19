@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from math import sqrt
 from typing import Mapping, Sequence
 from uuid import UUID
@@ -77,8 +77,8 @@ def cosine_similarity(left: Sequence[float] | None, right: Sequence[float] | Non
 
 
 def interest_overlap(user: Mapping[str, float], candidate: Mapping[str, float]) -> tuple[float, list[str]]:
-    normalized_user = {key.strip().lower(): max(0.0, value) for key, value in user.items()}
-    normalized_candidate = {key.strip().lower(): max(0.0, value) for key, value in candidate.items()}
+    normalized_user = _normalize_weighted_values(user)
+    normalized_candidate = _normalize_weighted_values(candidate)
     denominator = sum(normalized_user.values())
     if denominator == 0:
         return 0.0, []
@@ -88,26 +88,30 @@ def interest_overlap(user: Mapping[str, float], candidate: Mapping[str, float]) 
 
 
 def goal_compatibility(user_goals: set[str], candidate_goals: set[str]) -> tuple[float, list[str]]:
-    if not user_goals:
+    normalized_user = {goal.strip().lower() for goal in user_goals if goal.strip()}
+    normalized_candidate = {goal.strip().lower() for goal in candidate_goals if goal.strip()}
+    if not normalized_user:
         return 0.0, []
-    matches = sorted(user_goals & candidate_goals)
-    return len(matches) / len(user_goals), matches
+    matches = sorted(normalized_user & normalized_candidate)
+    return len(matches) / len(normalized_user), matches
 
 
 def event_relevance(candidate: Candidate, interest_score: float) -> tuple[float, str | None]:
     if candidate.target_type != "event":
         return 0.0, None
-    if candidate.start_time is None:
-        return min(1.0, (interest_score + candidate.group_relevance) / 2), "event has no scheduled date"
-    now = datetime.now(timezone.utc)
-    start_time = candidate.start_time if candidate.start_time.tzinfo else candidate.start_time.replace(tzinfo=timezone.utc)
-    days_until = (start_time - now).total_seconds() / 86400
-    upcoming_score = 1.0 if days_until >= 0 else 0.0
-    if 0 <= days_until <= 30:
-        upcoming_score = 0.8 + (days_until / 30) * 0.2
-    score = (upcoming_score * 0.4) + (interest_score * 0.35) + (candidate.group_relevance * 0.25)
-    connection = "upcoming event with matching interests" if days_until >= 0 and interest_score > 0 else "event relevance based on schedule and group fit"
+    scheduled_score = 1.0 if candidate.start_time is not None else 0.0
+    score = (scheduled_score * 0.4) + (interest_score * 0.35) + (candidate.group_relevance * 0.25)
+    connection = "scheduled event with matching interests" if interest_score > 0 else "event relevance based on schedule and group fit"
     return max(0.0, min(1.0, score)), connection
+
+
+def _normalize_weighted_values(values: Mapping[str, float]) -> dict[str, float]:
+    normalized: dict[str, float] = {}
+    for key, value in values.items():
+        name = key.strip().lower()
+        if name:
+            normalized[name] = max(normalized.get(name, 0.0), max(0.0, value))
+    return normalized
 
 
 def calculate_hybrid_score(

@@ -18,7 +18,7 @@ export function mapEvent(event: ApiEvent, group?: ApiGroup): Event {
 }
 
 export function mapRecommendation(recommendation: ApiRecommendation): Recommendation {
-  return { id: recommendation.id, type: recommendation.target_type, targetId: recommendation.target_id, title: recommendation.title, subtitle: recommendation.description, imageUrl: imageFallback, matchScore: recommendation.score, matchedInterests: recommendation.matched_interests, reasons: recommendation.reasons.map((reason) => ({ label: 'Why this matches', detail: reason, score: recommendation.score })), backendExplanation: recommendation.explanation }
+  return { id: recommendation.id, type: recommendation.target_type, targetId: recommendation.target_id, title: recommendation.title, subtitle: recommendation.description, imageUrl: imageFallback, matchScore: recommendation.score, matchedInterests: recommendation.matched_interests, reasons: [...recommendation.reasons, ...recommendation.matched_goals.map((goal) => `Matched goal: ${goal}`)].map((reason) => ({ label: 'Why this matches', detail: reason, score: recommendation.score })), backendExplanation: recommendation.explanation }
 }
 
 export function mapAnalysis(analysis: ApiInterestAnalysis): InterestProfile {

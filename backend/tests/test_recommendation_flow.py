@@ -88,6 +88,12 @@ def test_recommendations_handle_no_match_and_missing_embedding() -> None:
     assert results[0]["reasons"]
 
 
+def test_recommendations_return_empty_for_no_available_candidates() -> None:
+    service = make_service([])
+
+    assert asyncio.run(service.recommend(uuid4(), "I enjoy photography", 10)) == []
+
+
 def test_keyword_fallback_is_deterministic_for_recommendation_input() -> None:
     service = RecommendationService(MemorySession(), FakeEmbedding(), KeywordFallbackAIService())
     service._load_profile = lambda user_id: ({}, set())  # type: ignore[method-assign]
