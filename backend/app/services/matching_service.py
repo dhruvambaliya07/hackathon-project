@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from math import sqrt
-from typing import Mapping
+from typing import Mapping, Sequence
 from uuid import UUID
 
 
@@ -38,7 +38,7 @@ class Candidate:
     target_id: UUID
     title: str
     description: str
-    embedding: list[float] | None
+    embedding: Sequence[float] | None
     interests: Mapping[str, float]
     goals: frozenset[str] = frozenset()
     start_time: datetime | None = None
@@ -66,8 +66,8 @@ class MatchingService:
         )
 
 
-def cosine_similarity(left: list[float] | None, right: list[float] | None) -> float | None:
-    if not left or not right or len(left) != len(right):
+def cosine_similarity(left: Sequence[float] | None, right: Sequence[float] | None) -> float | None:
+    if left is None or right is None or len(left) == 0 or len(right) == 0 or len(left) != len(right):
         return None
     left_norm = sqrt(sum(value * value for value in left))
     right_norm = sqrt(sum(value * value for value in right))

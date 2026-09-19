@@ -21,6 +21,14 @@ def test_cosine_similarity_and_missing_embeddings() -> None:
     assert cosine_similarity([0.0, 0.0], [1.0, 0.0]) is None
 
 
+def test_cosine_similarity_accepts_pgvector_array_like_values() -> None:
+    class ArrayLike(list[float]):
+        def __bool__(self) -> bool:
+            raise ValueError("array truth value is ambiguous")
+
+    assert cosine_similarity(ArrayLike([1.0, 0.0]), ArrayLike([1.0, 0.0])) == 1.0
+
+
 def test_weighted_interest_overlap_returns_evidence() -> None:
     score, matches = interest_overlap({"Photography": 1.0, "Writing": 0.5}, {"photography": 0.8, "coding": 1.0})
     assert score == 0.8 / 1.5
