@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { EventCard } from '@/components/common/event-card'
 import { GroupCard } from '@/components/common/group-card'
 import { PageContainer } from '@/components/common/page-container'
+import { SafeImage } from '@/components/common/SafeImage'
 import { events, groups } from '@/data/mockData'
 
 const benefits = [
@@ -45,11 +46,11 @@ export function HomePage() {
               <Link to="/discover"><Button size="lg" variant="secondary">Discover My Communities <ArrowRight size={18} /></Button></Link>
               <Link to="/groups"><Button size="lg" className="border border-white/20 bg-white/10 text-white hover:bg-white/20">Explore Communities</Button></Link>
             </div>
-            <div className="mt-10 flex items-center gap-3 text-sm text-white/55"><div className="flex -space-x-2"><img className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=32" alt="" /><img className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=47" alt="" /><img className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=49" alt="" /></div><span>Join 1,800+ students finding their people</span></div>
+            <div className="mt-10 flex items-center gap-3 text-sm text-white/55"><div className="flex -space-x-2"><SafeImage className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=32" alt="Student" /><SafeImage className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=47" alt="Student" /><SafeImage className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=49" alt="Student" /></div><span>Join 1,800+ students finding their people</span></div>
           </div>
           <div className="relative mx-auto hidden w-full max-w-sm lg:block">
             <div className="absolute -left-7 top-12 z-[1] rounded-2xl bg-white p-3 text-ink shadow-float"><div className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-lg bg-mint/15 text-mint"><Check size={16} /></span><div><p className="text-[10px] font-extrabold uppercase tracking-wider text-ink/40">Good match</p><p className="text-xs font-extrabold">The Lens Club · 94%</p></div></div></div>
-            <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=85" alt="Friends laughing together outdoors" className="h-[420px] w-full rounded-[2rem] object-cover brightness-90" />
+            <SafeImage src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=85" alt="Friends laughing together outdoors" className="h-[420px] w-full rounded-[2rem] object-cover brightness-90" />
             <div className="absolute -bottom-5 -right-5 rounded-2xl bg-sun p-4 text-ink shadow-float"><Sparkles size={20} /><p className="mt-2 text-xs font-extrabold">More you,<br />more connected.</p></div>
           </div>
         </div>

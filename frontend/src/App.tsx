@@ -9,6 +9,8 @@ import { EventsPage } from '@/pages/EventsPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { GroupDetailPage } from '@/pages/GroupDetailPage'
 import { EventDetailPage } from '@/pages/EventDetailPage'
+import { NetworkStatus } from '@/components/common/NetworkStatus'
+import { RouteErrorBoundary } from '@/components/common/RouteErrorBoundary'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: 1 } } })
-export function App() { return <QueryClientProvider client={queryClient}><BrowserRouter><Routes><Route element={<AppLayout />}><Route path="/" element={<HomePage />} /><Route path="/discover" element={<DiscoverPage />} /><Route path="/recommendations" element={<RecommendationsPage />} /><Route path="/groups" element={<GroupsPage />} /><Route path="/groups/:id" element={<GroupDetailPage />} /><Route path="/events" element={<EventsPage />} /><Route path="/events/:id" element={<EventDetailPage />} /><Route path="/profile" element={<ProfilePage />} /><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes></BrowserRouter></QueryClientProvider> }
+export function App() { return <QueryClientProvider client={queryClient}><BrowserRouter><NetworkStatus /><RouteErrorBoundary><Routes><Route element={<AppLayout />}><Route path="/" element={<HomePage />} /><Route path="/discover" element={<DiscoverPage />} /><Route path="/recommendations" element={<RecommendationsPage />} /><Route path="/groups" element={<GroupsPage />} /><Route path="/groups/:id" element={<GroupDetailPage />} /><Route path="/events" element={<EventsPage />} /><Route path="/events/:id" element={<EventDetailPage />} /><Route path="/profile" element={<ProfilePage />} /><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes></RouteErrorBoundary></BrowserRouter></QueryClientProvider> }

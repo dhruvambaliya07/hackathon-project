@@ -45,6 +45,8 @@ Icebreakers can be launched from group details, event details, and recommendatio
 
 The `/profile` page shows interest strengths, goals, traits, saved communities, interested events, activity, and recent recommendations. Its edit mode adds/removes interests through `profileService`, allowing recommendation relevance and match chips to change from the same client-side profile state.
 
+Shared UX resilience includes skeleton loading with slow-network guidance, human-readable retry states, empty-state recovery actions, offline status messaging, route-level error recovery, invalid short-interest validation, AI/icebreaker generation errors, and image fallbacks for failed media.
+
 ## Backend integration status
 
 This checkout currently contains no FastAPI application, OpenAPI document, routes, or Pydantic schemas to inspect. Because no endpoint could be confirmed, the feature services keep their mock implementations isolated and do not make speculative network requests. Set `VITE_API_BASE_URL` when the backend is added, then map confirmed schemas in the service modules before enabling calls.

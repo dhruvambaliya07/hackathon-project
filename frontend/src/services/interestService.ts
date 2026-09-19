@@ -25,9 +25,7 @@ const mockProfile: Omit<InterestProfile, 'prompt'> = {
 
 const mockInterestService: InterestService = {
   async analyze(description: InterestAnalysisRequest['description']) {
-    if (!description.trim()) {
-      throw new Error('Tell us a little more about what you are into.')
-    }
+    if (description.trim().length < 12) throw new Error('Tell us a little more about what you are into so we can find a useful starting point.')
 
     await new Promise<void>((resolve) => window.setTimeout(resolve, 480))
     return { ...mockProfile, prompt: description.trim(), updatedAt: new Date().toISOString() }

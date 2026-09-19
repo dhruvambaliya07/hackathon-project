@@ -1,6 +1,12 @@
-import { AlertCircle, Inbox, LoaderCircle } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { AlertCircle, Inbox, LoaderCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-export function LoadingState({ label = 'Finding your people...' }: { label?: string }) { return <div className="flex min-h-48 flex-col items-center justify-center gap-3 text-ink/50"><LoaderCircle className="animate-spin" size={24} /><p className="text-sm font-semibold">{label}</p></div> }
-export function ErrorState({ onRetry }: { onRetry?: () => void }) { return <div className="flex min-h-48 flex-col items-center justify-center gap-3 text-center"><AlertCircle className="text-coral" /><p className="font-bold">Something went a little sideways.</p>{onRetry && <Button onClick={onRetry} variant="outline" size="sm">Try again</Button>}</div> }
-export function EmptyState({ title, detail }: { title: string; detail: string }) { return <div className="flex min-h-48 flex-col items-center justify-center gap-3 text-center"><Inbox className="text-ink/30" /><p className="font-bold">{title}</p><p className="max-w-sm text-sm text-ink/50">{detail}</p></div> }
+export function LoadingState({ label = 'Finding your people...', onRetry }: { label?: string; onRetry?: () => void }) {
+  const [slow, setSlow] = useState(false)
+  useEffect(() => { const timer = window.setTimeout(() => setSlow(true), 1400); return () => window.clearTimeout(timer) }, [])
+  return <div className="flex min-h-56 flex-col items-center justify-center gap-4 text-center text-ink/50"><div className="w-full max-w-xs space-y-3"><div className="h-3 animate-pulse rounded-full bg-ink/10" /><div className="h-3 w-4/5 animate-pulse rounded-full bg-ink/10" /><div className="h-3 w-3/5 animate-pulse rounded-full bg-ink/10" /></div><LoaderCircle className="animate-spin text-coral" size={24} /><div><p className="text-sm font-bold text-ink/65">{label}</p>{slow && <p className="mt-2 text-xs font-semibold text-ink/45">This is taking a little longer than usual. You can keep waiting or try again.</p>}</div>{slow && onRetry && <Button onClick={onRetry} variant="outline" size="sm"><RefreshCw size={14} /> Try again</Button>}</div>
+}
+
+export function ErrorState({ onRetry, detail = 'We could not load this right now. Your work is safe, and you can try again.' }: { onRetry?: () => void; detail?: string }) { return <div className="flex min-h-56 flex-col items-center justify-center gap-3 px-5 text-center"><span className="grid h-11 w-11 place-items-center rounded-xl bg-coral/10 text-coral"><AlertCircle size={21} /></span><p className="font-bold">We could not load this yet.</p><p className="max-w-sm text-sm leading-6 text-ink/55">{detail}</p>{onRetry && <Button onClick={onRetry} variant="outline" size="sm"><RefreshCw size={14} /> Try again</Button>}</div> }
+export function EmptyState({ title, detail, action }: { title: string; detail: string; action?: ReactNode }) { return <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-5 text-center"><span className="grid h-11 w-11 place-items-center rounded-xl bg-ink/5 text-ink/35"><Inbox size={20} /></span><p className="font-bold">{title}</p><p className="max-w-sm text-sm leading-6 text-ink/50">{detail}</p>{action}</div> }
