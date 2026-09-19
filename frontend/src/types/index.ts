@@ -16,10 +16,22 @@ export interface Interest {
   color: 'coral' | 'mint' | 'sun' | 'sky'
 }
 
+export interface InterestSignal {
+  id: string
+  name: string
+  score: number
+  category: string
+  color: Interest['color']
+}
+
 export interface InterestProfile {
   userId: string
   prompt: string
   tags: Interest[]
+  signals: InterestSignal[]
+  goals: string[]
+  traits: string[]
+  explanation: string
   updatedAt: string
 }
 
