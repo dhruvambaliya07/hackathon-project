@@ -1,0 +1,7 @@
+import { CalendarDays, MapPin, Users } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import type { Event } from '@/types'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
+
+export function EventCard({ event }: { event: Event }) { return <Link to={`/events/${event.id}`}><Card className="group overflow-hidden transition hover:-translate-y-1 hover:shadow-float"><div className="relative h-40 overflow-hidden"><img src={event.imageUrl} alt="" className="h-full w-full object-cover brightness-90 transition duration-500 group-hover:scale-105" /><div className="absolute bottom-3 left-3 rounded-xl bg-white px-3 py-2 text-center shadow"><strong className="block text-lg leading-none">{event.date.split(' ')[0]}</strong><span className="text-[10px] font-extrabold uppercase text-ink/45">Nov</span></div></div><div className="p-5"><p className="text-xs font-bold text-coral">{event.groupName}</p><h3 className="heading mt-1 text-lg">{event.title}</h3><div className="mt-4 grid gap-2 text-xs font-semibold text-ink/55"><span className="flex items-center gap-2"><CalendarDays size={14} /> {event.date}, {event.time}</span><span className="flex items-center gap-2"><MapPin size={14} /> {event.location}</span><span className="flex items-center gap-2"><Users size={14} /> {event.attendees} going</span></div><div className="mt-4 flex gap-2">{event.tags.map((tag) => <Badge key={tag}>{tag}</Badge>)}</div></div></Card></Link> }

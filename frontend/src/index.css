@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: 201 30% 18%;
+  --canvas: 42 33% 97%;
+  --surface: 0 0% 100%;
+  --line: 205 21% 88%;
+  --coral: 8 78% 63%;
+  --mint: 161 39% 49%;
+  --sun: 39 90% 64%;
+  --sky: 198 74% 61%;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: hsl(var(--canvas)); color: hsl(var(--ink)); font-family: 'Manrope', sans-serif; }
+button, input, textarea { font: inherit; }
+::selection { background: hsl(var(--sun) / 0.35); }
+
+@layer components {
+  .page-grid { background-image: linear-gradient(hsl(var(--line) / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--line) / 0.3) 1px, transparent 1px); background-size: 32px 32px; }
+  .eyebrow { @apply text-xs font-extrabold uppercase tracking-[0.18em] text-ink/45; }
+  .heading { @apply font-display font-extrabold tracking-[-0.04em]; }
+}

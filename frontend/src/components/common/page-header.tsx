@@ -1,0 +1,2 @@
+interface PageHeaderProps { eyebrow?: string; title: string; detail?: string; action?: React.ReactNode }
+export function PageHeader({ eyebrow, title, detail, action }: PageHeaderProps) { return <div className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"> <div>{eyebrow && <p className="eyebrow mb-2">{eyebrow}</p>}<h1 className="heading text-4xl sm:text-5xl">{title}</h1>{detail && <p className="mt-3 max-w-2xl text-sm leading-6 text-ink/55 sm:text-base">{detail}</p>}</div>{action}</div> }
