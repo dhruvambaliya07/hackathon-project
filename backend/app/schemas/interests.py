@@ -1,9 +1,10 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class InterestAnalyzeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     text: str = Field(min_length=3, max_length=2000, description="Natural-language description of the student's interests.")
 
     @field_validator("text")

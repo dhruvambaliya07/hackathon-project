@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RecommendationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     user_id: UUID | None = None
     interest_text: str = Field(min_length=3, max_length=2000)
     limit: int = Field(default=10, ge=1, le=50)

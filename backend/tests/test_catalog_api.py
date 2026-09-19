@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.db.session import SessionLocal, get_db
 from app.main import app
-from app.models import Event, Group
+from app.models import Event, Group, Interest, User
 from app.seed import seed_database
 
 
@@ -88,3 +88,13 @@ def test_get_event_includes_group_interests_and_related_events(catalog_client: T
 def test_missing_event_and_invalid_uuid(catalog_client: TestClient) -> None:
     assert catalog_client.get("/api/v1/events/00000000-0000-0000-0000-000000000000").status_code == 404
     assert catalog_client.get("/api/v1/events/not-a-uuid").status_code == 422
+
+
+def test_seed_is_idempotent(catalog_client: TestClient) -> None:
+    with SessionLocal() as session:
+        seed_database(session)
+        seed_database(session)
+        assert session.query(Interest).count() == 30
+        assert session.query(Group).count() == 20
+        assert session.query(Event).count() == 40
+        assert session.query(User).count() == 5

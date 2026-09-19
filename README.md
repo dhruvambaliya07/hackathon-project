@@ -46,3 +46,7 @@ The recommendation endpoint validates the user, analyzes free-form interest text
 ## Security and performance controls
 
 `CORS_ORIGINS` must contain explicit origins; wildcard credentialed CORS is rejected. Provider-backed endpoints use lightweight per-process request limits, bounded request fields, UUID validation, safe generic errors, and prompt delimiters that mark user text as untrusted data. Recommendations make one analysis call and one embedding call per request, then use bounded vector retrieval and local hybrid scoring; no per-recommendation AI loop is used. Health responses expose only `ok`/`unavailable` database status and the application version.
+
+## Backend tests
+
+Run `pytest` from `backend/`. The suite uses deterministic mocked AI and embedding providers, creates a local SQLite schema automatically, and exercises API behavior, validation, fallback paths, ranking, profile/feedback state, security controls, and seed idempotency. Catalog, lifecycle, and end-to-end database tests are PostgreSQL-gated. Coverage reporting requires the optional `pytest-cov` package.

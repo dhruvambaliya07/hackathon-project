@@ -42,3 +42,19 @@ def test_validation_errors_are_safe_and_consistent() -> None:
     body = response.json()
     assert body["error"]["code"] == "validation_error"
     assert "traceback" not in response.text.lower()
+
+
+def test_health_reports_database_connectivity() -> None:
+    response = client.get("/api/v1/health")
+
+    assert response.status_code == 200
+    assert response.json()["data"]["status"] == "ok"
+    assert response.json()["data"]["database"] == "ok"
+    assert "DATABASE_URL" not in response.text
+
+
+def test_unexpected_request_fields_are_rejected() -> None:
+    response = client.post("/api/v1/interests/analyze", json={"text": "photography", "admin": True})
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "validation_error"

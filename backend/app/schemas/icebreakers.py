@@ -1,10 +1,11 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class IcebreakerRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     user_id: UUID
     target_type: Literal["group", "event"]
     target_id: UUID
