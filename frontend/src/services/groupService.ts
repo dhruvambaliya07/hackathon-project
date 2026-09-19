@@ -1,5 +1,9 @@
 import { groups } from '@/data/mockData'
 import type { Group } from '@/types'
+import { mapGroup } from '@/api/mappers'
+import type { ApiEnvelope, ApiGroup } from '@/api/types'
+import { apiMode } from '@/config/runtime'
+import { apiClient, unwrapApiResponse } from '@/services/apiClient'
 
 export type GroupListResponse = Group[]
 export type GroupDetailResponse = Group | undefined
@@ -42,3 +46,10 @@ export const groupService: GroupService = {
   toggleInterested(id) { return toggleId(keys.interested, id) },
   toggleSaved(id) { return toggleId(keys.saved, id) },
 }
+
+if (apiMode === 'api') {
+  groupService.list = async () => mapGroupList(unwrapApiResponse(await apiClient.get<ApiEnvelope<ApiGroup[]>>('/groups?page=1&page_size=100')))
+  groupService.getById = async (id) => mapGroup(unwrapApiResponse(await apiClient.get<ApiEnvelope<ApiGroup>>(`/groups/${id}`)))
+}
+
+function mapGroupList(items: ApiGroup[]): Group[] { return items.map(mapGroup) }

@@ -1,4 +1,8 @@
 import type { InterestProfile } from '@/types'
+import { mapAnalysis } from '@/api/mappers'
+import type { ApiEnvelope, ApiInterestAnalysis } from '@/api/types'
+import { apiMode } from '@/config/runtime'
+import { apiClient, unwrapApiResponse } from '@/services/apiClient'
 
 export interface InterestAnalysisRequest { description: string }
 export type InterestAnalysisResponse = InterestProfile
@@ -43,3 +47,7 @@ const mockInterestService: InterestService = {
 }
 
 export const interestService: InterestService = mockInterestService
+
+if (apiMode === 'api') {
+  interestService.analyze = async (description) => mapAnalysis(unwrapApiResponse(await apiClient.post<{ text: string }, ApiEnvelope<ApiInterestAnalysis>>('/interests/analyze', { text: description })))
+}

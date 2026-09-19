@@ -3,6 +3,12 @@ export interface ApiClientOptions {
   timeoutMs?: number
 }
 
+export interface ApiEnvelope<T> {
+  data: T | null
+  meta: { request_id?: string | null; page?: number | null; page_size?: number | null; total?: number | null }
+  error: { code: string; message: string; details?: unknown } | null
+}
+
 export interface ApiRequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown
 }
@@ -64,3 +70,10 @@ export class ApiClient {
 }
 
 export const apiClient = new ApiClient()
+
+export function unwrapApiResponse<T>(response: ApiEnvelope<T>): T {
+  if (response.error || response.data === null) {
+    throw new ApiClientError(response.error?.message ?? 'The API returned no data.', 500, response.error)
+  }
+  return response.data
+}

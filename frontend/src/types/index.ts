@@ -61,6 +61,8 @@ export interface Event {
   imageUrl: string
   attendees: number
   tags: string[]
+  startsAt?: string
+  endsAt?: string
 }
 
 export interface RecommendationReason {
@@ -82,6 +84,9 @@ export interface IcebreakerRequest {
   community: string
   event?: string
   style: IcebreakerStyle
+  userId?: string
+  targetType?: 'group' | 'event'
+  targetId?: string
 }
 
 export interface Recommendation {
@@ -94,7 +99,7 @@ export interface Recommendation {
   matchScore: number
   matchedInterests: string[]
   reasons: RecommendationReason[]
-  icebreakers: Icebreaker[]
+  backendExplanation?: string
 }
 
 export interface Feedback {

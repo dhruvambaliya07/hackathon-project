@@ -42,12 +42,16 @@ The frontend API client reads `VITE_API_BASE_URL` and strips a trailing slash. S
 
 ```env
 VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_API_MODE=api
+VITE_DEMO_USER_ID=89d4a21e-b315-515f-8ff3-80b56e85ed6c
 ```
 
-The current frontend service modules still contain mock/local-storage implementations. To connect the UI, replace those service implementations with calls through `apiClient`:
+Use `VITE_API_MODE=mock` to keep deterministic local data without a backend. The default mode is mock.
+
+The centralized frontend services select the API or mock adapter at startup. Components should continue calling the services rather than `fetch` directly:
 
 1. `profileService.getProfile()` -> `GET /profile/{userId}`.
-2. `profileService.updateInterests()` -> `PUT /profile/{userId}` with `{ name, bio, interests, goals }`.
+2. `profileService.updateInterests()` -> `PUT /profile/{userId}` with `{ interests }`.
 3. Recommendation submit -> `POST /recommendations` with `{ user_id, interest_text, limit }`.
 4. Group/event lists and details -> `/groups` and `/events` endpoints.
 5. Icebreaker dialog -> `POST /icebreakers` using the recommendation target type/ID and selected style.

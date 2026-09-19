@@ -1,4 +1,7 @@
-import type { Icebreaker, IcebreakerRequest } from '@/types'
+import type { Icebreaker, IcebreakerRequest, IcebreakerStyle } from '@/types'
+import type { ApiEnvelope, ApiIcebreaker } from '@/api/types'
+import { apiClient, unwrapApiResponse } from '@/services/apiClient'
+import { apiMode, demoUserId } from '@/config/runtime'
 
 export interface IcebreakerService {
   generate(request: IcebreakerRequest): Promise<Icebreaker>
@@ -27,3 +30,12 @@ const mockIcebreakerService: IcebreakerService = {
 }
 
 export const icebreakerService = mockIcebreakerService
+
+if (apiMode === 'api') {
+  icebreakerService.generate = async (request) => {
+    if (!request.targetType || !request.targetId) throw new Error('A target is required to generate an icebreaker.')
+    const response = await apiClient.post<{ user_id: string; target_type: 'group' | 'event'; target_id: string; style: IcebreakerStyle }, ApiEnvelope<ApiIcebreaker>>('/icebreakers', { user_id: request.userId ?? demoUserId, target_type: request.targetType, target_id: request.targetId, style: request.style })
+    const result = unwrapApiResponse(response)
+    return { id: `icebreaker-${Date.now()}`, text: result.icebreaker, context: `${result.style} icebreaker` }
+  }
+}

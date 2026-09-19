@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { icebreakerService } from '@/services/icebreakerService'
 import type { Icebreaker, IcebreakerRequest, IcebreakerStyle } from '@/types'
+import { demoUserId } from '@/config/runtime'
+import { useLocation, useParams } from 'react-router-dom'
 
 interface IcebreakerDialogProps {
   open: boolean
@@ -11,9 +13,15 @@ interface IcebreakerDialogProps {
   interests: string[]
   community: string
   event?: string
+  targetType?: 'group' | 'event'
+  targetId?: string
 }
 
-export function IcebreakerDialog({ open, onClose, interests, community, event }: IcebreakerDialogProps) {
+export function IcebreakerDialog({ open, onClose, interests, community, event, targetType, targetId }: IcebreakerDialogProps) {
+  const routeParams = useParams()
+  const location = useLocation()
+  const resolvedTargetType = targetType ?? (location.pathname.startsWith('/events/') ? 'event' : 'group')
+  const resolvedTargetId = targetId ?? routeParams.id
   const [style, setStyle] = useState<IcebreakerStyle>('friendly')
   const [icebreaker, setIcebreaker] = useState<Icebreaker | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -34,7 +42,7 @@ export function IcebreakerDialog({ open, onClose, interests, community, event }:
     setIsGenerating(true)
     setError('')
     setCopied(false)
-    const request: IcebreakerRequest = { interests, community, event, style: nextStyle }
+    const request: IcebreakerRequest = { interests, community, event, style: nextStyle, userId: demoUserId, targetType: resolvedTargetType, targetId: resolvedTargetId }
     try { setIcebreaker(await icebreakerService.generate(request)) } catch (generationError) { setError(generationError instanceof Error ? generationError.message : 'We could not generate a starter right now.') } finally { setIsGenerating(false) }
   }
 

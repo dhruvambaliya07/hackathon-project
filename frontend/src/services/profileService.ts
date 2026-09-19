@@ -1,4 +1,8 @@
 import type { Interest, InterestProfile } from '@/types'
+import { mapProfile } from '@/api/mappers'
+import type { ApiEnvelope, ApiProfile } from '@/api/types'
+import { apiMode, demoUserId } from '@/config/runtime'
+import { apiClient, unwrapApiResponse } from '@/services/apiClient'
 
 export interface ProfileInterestUpdateRequest { interests: string[] }
 export type ProfileResponse = InterestProfile
@@ -54,6 +58,11 @@ export const profileService: ProfileService = {
     })
     return writeProfile({ ...current, signals: nextSignals, updatedAt: new Date().toISOString() })
   },
+}
+
+if (apiMode === 'api') {
+  profileService.getProfile = async () => mapProfile(unwrapApiResponse(await apiClient.get<ApiEnvelope<ApiProfile>>(`/profile/${demoUserId}`)))
+  profileService.updateInterests = async (interests) => mapProfile(unwrapApiResponse(await apiClient.put<{ interests: string[] }, ApiEnvelope<ApiProfile>>(`/profile/${demoUserId}`, { interests })))
 }
 
 export const profileInterestOptions = ['Photography', 'Filmmaking', 'Technology', 'Event Management', 'Music', 'Design', 'Entrepreneurship', 'Sports']

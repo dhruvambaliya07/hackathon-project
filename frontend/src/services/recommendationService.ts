@@ -1,6 +1,10 @@
 import { events, groups, recommendations } from '@/data/mockData'
 import { profileService } from '@/services/profileService'
 import type { InterestProfile, Recommendation } from '@/types'
+import type { ApiEnvelope, ApiRecommendation } from '@/api/types'
+import { mapRecommendation } from '@/api/mappers'
+import { apiClient, unwrapApiResponse } from '@/services/apiClient'
+import { apiMode, demoUserId } from '@/config/runtime'
 
 export type RecommendationListResponse = Recommendation[]
 
@@ -43,8 +47,7 @@ export const recommendationService: RecommendationService = {
     const profileInterests = new Set(profile.signals.map((signal) => signal.name.toLowerCase()))
     return recommendations.map((recommendation) => {
       const matchedInterests = recommendation.matchedInterests.filter((interest) => profileInterests.has(interest.toLowerCase()))
-      const relevanceShift = matchedInterests.length ? 4 : -8
-      return { ...recommendation, matchScore: Math.min(99, Math.max(55, recommendation.matchScore + relevanceShift)), matchedInterests: matchedInterests.length ? matchedInterests : recommendation.matchedInterests.slice(0, 1) }
+      return { ...recommendation, matchedInterests: matchedInterests.length ? matchedInterests : recommendation.matchedInterests.slice(0, 1) }
     })
   },
   async getInterestProfile() {
@@ -62,6 +65,16 @@ export const recommendationService: RecommendationService = {
   toggleInterested(recommendationId) {
     return toggleId(storageKeys.interested, recommendationId)
   },
+}
+
+if (apiMode === 'api') {
+  recommendationService.list = async () => {
+    const profile = await profileService.getProfile()
+    const interestText = profile.prompt || profile.signals.map((signal) => signal.name).join(', ') || 'general hobbies'
+    const response = await apiClient.post<{ user_id: string; interest_text: string; limit: number }, ApiEnvelope<{ recommendations: ApiRecommendation[] }>>('/recommendations', { user_id: demoUserId, interest_text: interestText, limit: 50 })
+    return unwrapApiResponse(response).recommendations.map(mapRecommendation)
+  }
+  recommendationService.getInterestProfile = profileService.getProfile
 }
 
 export function findRecommendationContext(recommendation: Recommendation) {

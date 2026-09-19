@@ -1,5 +1,9 @@
 import { events } from '@/data/mockData'
 import type { Event } from '@/types'
+import { mapEvent } from '@/api/mappers'
+import type { ApiEnvelope, ApiEvent, ApiGroup } from '@/api/types'
+import { apiMode } from '@/config/runtime'
+import { apiClient, unwrapApiResponse } from '@/services/apiClient'
 
 export type EventListResponse = Event[]
 export type EventDetailResponse = Event | undefined
@@ -42,7 +46,7 @@ export const eventService: EventService = {
   getInterestedIds() { return readIds() },
   toggleInterested(id) { return toggleId(id) },
   downloadCalendarEvent(event) {
-    const start = new Date(`${new Date().getFullYear()} ${event.date} ${event.time}`)
+    const start = event.startsAt ? new Date(event.startsAt) : new Date(`${new Date().getFullYear()} ${event.date} ${event.time}`)
     const end = new Date(start.getTime() + 90 * 60 * 1000)
     const ics = [
       'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Aatmoday Connect//Events//EN', 'BEGIN:VEVENT',
@@ -58,4 +62,24 @@ export const eventService: EventService = {
     link.click()
     URL.revokeObjectURL(url)
   },
+}
+
+if (apiMode === 'api') {
+  eventService.list = async () => {
+    const [eventResponse, groupResponse] = await Promise.all([
+      apiClient.get<ApiEnvelope<ApiEvent[]>>('/events?page=1&page_size=100'),
+      apiClient.get<ApiEnvelope<ApiGroup[]>>('/groups?page=1&page_size=100'),
+    ])
+    const groupsById = new Map(unwrapApiResponse(groupResponse).map((group) => [group.id, group]))
+    return unwrapApiResponse(eventResponse).map((event) => mapEvent(event, groupsById.get(event.group_id)))
+  }
+  eventService.getById = async (id) => {
+    const [eventResponse, groupResponse] = await Promise.all([
+      apiClient.get<ApiEnvelope<ApiEvent>>(`/events/${id}`),
+      apiClient.get<ApiEnvelope<ApiGroup[]>>('/groups?page=1&page_size=100'),
+    ])
+    const event = unwrapApiResponse(eventResponse)
+    const group = unwrapApiResponse(groupResponse).find((item) => item.id === event.group_id)
+    return mapEvent(event, group)
+  }
 }
