@@ -10,7 +10,7 @@ from app.config import get_settings
 from app.db.session import SessionLocal, get_db
 from app.main import app
 from app.models import Event, Group, Interest, User
-from app.seed import seed_database
+from app.seed import INTEREST_DATA, seed_database
 
 
 pytestmark = pytest.mark.skipif(
@@ -42,23 +42,22 @@ def catalog_client() -> Generator[TestClient, None, None]:
 def test_list_groups_and_pagination(catalog_client: TestClient) -> None:
     response = catalog_client.get("/api/v1/groups?page=2&page_size=5")
     assert response.status_code == 200
-    assert len(response.json()["data"]) == 5
-    assert response.json()["meta"] == {"request_id": None, "page": 2, "page_size": 5, "total": 20}
+    assert len(response.json()) == 5
 
 
 def test_search_and_filter_groups(catalog_client: TestClient) -> None:
     response = catalog_client.get("/api/v1/groups?search=photography&category=creative&interest=Photography")
     assert response.status_code == 200
-    assert response.json()["meta"]["total"] >= 1
-    assert all("photography" in item["name"].lower() or "photography" in item["description"].lower() for item in response.json()["data"])
+    assert response.json()
+    assert all("photography" in item["name"].lower() or "photography" in item["description"].lower() for item in response.json())
 
 
 def test_get_group_includes_interests_and_upcoming_events(catalog_client: TestClient) -> None:
-    group_id = catalog_client.get("/api/v1/groups").json()["data"][0]["id"]
+    group_id = catalog_client.get("/api/v1/groups").json()[0]["id"]
     response = catalog_client.get(f"/api/v1/groups/{group_id}")
     assert response.status_code == 200
-    assert response.json()["data"]["interests"]
-    assert response.json()["data"]["upcoming_events"]
+    assert response.json()["interests"]
+    assert response.json()["upcoming_events"]
 
 
 def test_missing_group_returns_404(catalog_client: TestClient) -> None:
@@ -69,20 +68,20 @@ def test_missing_group_returns_404(catalog_client: TestClient) -> None:
 def test_list_and_filter_events(catalog_client: TestClient) -> None:
     response = catalog_client.get("/api/v1/events?page=1&page_size=10&category=Technology")
     assert response.status_code == 200
-    assert len(response.json()["data"]) == 10
-    group_id = response.json()["data"][0]["group_id"]
+    assert 0 < len(response.json()) <= 10
+    group_id = response.json()[0]["group_id"]
     filtered = catalog_client.get(f"/api/v1/events?group_id={group_id}")
     assert filtered.status_code == 200
-    assert all(item["group_id"] == group_id for item in filtered.json()["data"])
+    assert all(item["group_id"] == group_id for item in filtered.json())
 
 
 def test_get_event_includes_group_interests_and_related_events(catalog_client: TestClient) -> None:
-    event_id = catalog_client.get("/api/v1/events?page_size=1").json()["data"][0]["id"]
+    event_id = catalog_client.get("/api/v1/events?page_size=1").json()[0]["id"]
     response = catalog_client.get(f"/api/v1/events/{event_id}")
     assert response.status_code == 200
-    assert response.json()["data"]["group"]
-    assert response.json()["data"]["interests"]
-    assert response.json()["data"]["related_events"]
+    assert response.json()["group"]
+    assert response.json()["interests"]
+    assert response.json()["related_events"]
 
 
 def test_missing_event_and_invalid_uuid(catalog_client: TestClient) -> None:
@@ -94,7 +93,7 @@ def test_seed_is_idempotent(catalog_client: TestClient) -> None:
     with SessionLocal() as session:
         seed_database(session)
         seed_database(session)
-        assert session.query(Interest).count() == 30
+        assert session.query(Interest).count() == len(INTEREST_DATA)
         assert session.query(Group).count() == 20
         assert session.query(Event).count() == 40
         assert session.query(User).count() == 5

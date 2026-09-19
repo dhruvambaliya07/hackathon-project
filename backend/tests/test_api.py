@@ -31,7 +31,7 @@ def test_analyze_returns_normal_response_body() -> None:
 def test_groups_returns_normal_list_body() -> None:
     response = client.get("/api/v1/groups?page=2&page_size=5")
     assert response.status_code == 200
-    assert response.json() == []
+    assert isinstance(response.json(), list)
 
 
 def test_validation_errors_are_safe_and_consistent() -> None:

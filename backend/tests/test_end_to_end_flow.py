@@ -97,14 +97,14 @@ def test_complete_profile_to_feedback_journey(journey_client) -> None:
     assert client.get(f"/api/v1/profile/{user.id}").status_code == 200
     analysis = client.post("/api/v1/interests/analyze", json={"text": "I love taking photos"})
     assert analysis.status_code == 200
-    assert analysis.json()["data"]["interests"][0]["name"] == "Photography"
+    assert analysis.json()["interests"][0]["name"] == "Photography"
 
     recommendations = client.post(
         "/api/v1/recommendations",
         json={"user_id": str(user.id), "interest_text": "I love taking photos", "limit": 1},
     )
     assert recommendations.status_code == 200
-    item = recommendations.json()["data"]["recommendations"][0]
+    item = recommendations.json()["recommendations"][0]
     assert UUID(item["id"])
     assert item["reasons"]
     assert item["matched_interests"]
@@ -117,7 +117,7 @@ def test_complete_profile_to_feedback_journey(journey_client) -> None:
         json={"user_id": str(user.id), "target_type": item["target_type"], "target_id": item["target_id"], "style": "casual"},
     )
     assert icebreaker.status_code == 200
-    assert icebreaker.json()["data"]["icebreaker"]
+    assert icebreaker.json()["icebreaker"]
 
     feedback = client.post(
         "/api/v1/feedback",
@@ -127,7 +127,7 @@ def test_complete_profile_to_feedback_journey(journey_client) -> None:
 
     final_profile = client.get(f"/api/v1/profile/{user.id}")
     assert final_profile.status_code == 200
-    state = final_profile.json()["data"]
+    state = final_profile.json()
     assert any(interest["name"] == "Photography" for interest in state["interests"])
     if item["target_type"] == "group":
         assert any(group["id"] == item["target_id"] for group in state["saved_groups"])
