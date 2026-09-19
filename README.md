@@ -23,3 +23,5 @@ Create a production build with `npm run build`.
 ## Routes
 
 `/`, `/discover`, `/recommendations`, `/groups`, `/groups/:id`, `/events`, `/events/:id`, and `/profile` are implemented.
+
+The homepage at `/` includes the complete discovery journey: hero CTAs, an interactive interest preview that routes to `/discover`, value highlights, a three-step explainer, featured communities, upcoming events, and a final discovery CTA.
