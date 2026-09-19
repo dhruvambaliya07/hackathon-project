@@ -19,6 +19,7 @@ Create a production build with `npm run build`.
 - `src/services/interestService.ts` owns the interest analysis contract, including the current mock implementation and manual fallback. It can later call `POST /api/v1/interests/analyze` without changing the UI.
 - `src/services/recommendationService.ts` owns recommendation retrieval, profile data, and local saved/interested state. It is prepared for `POST /api/v1/recommendations`.
 - `src/services/groupService.ts` owns community retrieval and local saved/interested state. It is the backend-ready boundary for the community directory and group detail actions.
+- `src/services/eventService.ts` owns event retrieval, local interested state, and client-side `.ics` calendar downloads. It is the backend-ready boundary for event discovery and detail actions.
 - `src/hooks` exposes TanStack Query hooks for UI consumption.
 - `src/components` contains reusable primitives and feature component locations.
 - `src/pages` contains the routed discovery, recommendation, community, event, and profile experiences.
@@ -34,3 +35,5 @@ The `/discover` flow accepts natural-language interests, supports suggested prom
 The `/recommendations` page presents explainable community and event matches, profile relevance bars, match reasons, filters, sorting, skeleton loading, recoverable errors, empty states, and locally persisted save/interested actions.
 
 The `/groups` directory supports client-side search plus category, interest, and popularity filters. `/groups/:id` includes community context, personalized match evidence, activities, group events, and locally persisted interested/save actions with confirmation feedback.
+
+The `/events` directory supports search plus date, category, community, and location filters. `/events/:id` includes event details, matched interests, reasons to attend, community information, related events, local interested state, and an `.ics` Add to Calendar download.
