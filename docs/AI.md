@@ -12,7 +12,7 @@ If the provider times out, fails, or returns malformed structured output, `Keywo
 
 ## Icebreakers
 
-`POST /api/v1/icebreakers` is called only when a client requests an opener. Its context contains only user interest names, public group/event fields, target interests, and the requested style. Provider output is validated with the Pydantic `AIIcebreakerResponse` schema, normalized, and limited to 280 characters. Invalid, empty, oversized, or failed output falls back to a deterministic template using only available target and matched-interest context.
+`POST /api/v1/icebreakers` is called only when a client requests an opener. Its context contains only user interest names, public group/event fields, target interests, and the requested style. Provider output is validated with the Pydantic `AIIcebreakerResponse` schema, normalized, and limited to 280 characters. Invalid, empty, oversized, or failed output falls back to a deterministic template that names an available shared interest and target when present.
 
 ## Prompt safety
 

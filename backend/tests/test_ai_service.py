@@ -107,3 +107,10 @@ def test_fallback_is_deterministic_and_marked() -> None:
     assert first == second
     assert first.source == "fallback"
     assert {item.name for item in first.interests} == {"filmmaking", "web development"}
+
+
+def test_icebreaker_fallback_uses_context_interest() -> None:
+    context = "Style: friendly. event name=Lens Walk; Target interests: photography. Shared user interests: photography, travel."
+    result = asyncio.run(KeywordFallbackAIService().generate_icebreaker(context))
+    assert "photography" in result
+    assert "Lens Walk" in result

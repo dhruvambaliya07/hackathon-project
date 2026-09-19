@@ -140,7 +140,14 @@ class KeywordFallbackAIService:
         return "Fallback explanation: recommendations are based on matching normalized keywords."
 
     async def generate_icebreaker(self, context: str) -> str:
-        return "What part of this interest would you most enjoy exploring with others?"
+        shared_match = re.search(r"Shared user interests: ([^.]+)\.", context)
+        target_match = re.search(r"(?:group|event) name=([^;]+)", context)
+        shared_interest = (shared_match.group(1).split(",")[0].strip() if shared_match and shared_match.group(1).strip() != "none" else "")
+        target_name = target_match.group(1).strip() if target_match else "this community"
+        target_type = "event" if "event name=" in context else "group"
+        if shared_interest:
+            return f"I saw you're interested in {shared_interest} too. Are you joining the {target_name} {target_type}?"
+        return f"What are you most looking forward to about the {target_name} {target_type}?"
 
 
 class StructuredAIService:
