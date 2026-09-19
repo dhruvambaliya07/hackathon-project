@@ -28,6 +28,7 @@ Returns normalized interests with confidence, goals, traits, source, and origina
 - `GET /groups/{group_id}`
 
 `page_size` is limited to 100. Group detail includes linked interests and upcoming events.
+Unknown group IDs return `404`; the frontend presents a dedicated not-found state with a link back to the groups listing.
 
 ### Events
 
@@ -35,6 +36,7 @@ Returns normalized interests with confidence, goals, traits, source, and origina
 - `GET /events/{event_id}`
 
 `page_size` is limited to 100. Event detail includes its group, interests, and related events.
+Unknown event IDs return `404`; the frontend presents a dedicated not-found state with a link back to the events listing.
 
 ### Recommendations
 

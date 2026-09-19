@@ -11,6 +11,7 @@ import { EventCard } from '@/components/common/event-card'
 import { IcebreakerDialog } from '@/components/common/IcebreakerDialog'
 import { PageContainer } from '@/components/common/page-container'
 import { GroupMatchReason } from '@/components/groups/GroupMatchReason'
+import { ApiClientError } from '@/services/apiClient'
 import { groupService } from '@/services/groupService'
 import { recommendationService } from '@/services/recommendationService'
 import { eventService } from '@/services/eventService'
@@ -28,10 +29,12 @@ export function GroupDetailPage() {
   function notify(message: string) { setToastMessage(message); window.setTimeout(() => setToastMessage(''), 2400) }
   function toggleInterested() { if (!id) return; const next = groupService.toggleInterested(id); setInterested(next); notify(next ? 'You are on the interested list.' : 'Removed from your interested communities.') }
   function toggleSaved() { if (!id) return; const next = groupService.toggleSaved(id); setSaved(next); notify(next ? 'Community saved for later.' : 'Community removed from saved.') }
+  const groupNotFound = groupQuery.isError && groupQuery.error instanceof ApiClientError && groupQuery.error.status === 404
 
   if (groupQuery.isPending || recommendationsQuery.isPending || eventsQuery.isPending) return <PageContainer><LoadingState label="Loading community..." /></PageContainer>
+  if (groupNotFound) return <PageContainer><EmptyState title="Community not found" detail="This community may have moved. Head back to explore what is active now." action={<Link to="/groups"><Button variant="outline">Browse communities</Button></Link>} /></PageContainer>
   if (groupQuery.isError || recommendationsQuery.isError || eventsQuery.isError) return <PageContainer><ErrorState onRetry={() => { void groupQuery.refetch(); void recommendationsQuery.refetch(); void eventsQuery.refetch() }} /></PageContainer>
-  if (!groupQuery.data) return <PageContainer><EmptyState title="Community not found" detail="This community may have moved. Head back to explore what is active now." /></PageContainer>
+  if (!groupQuery.data) return <PageContainer><EmptyState title="Community not found" detail="This community may have moved. Head back to explore what is active now." action={<Link to="/groups"><Button variant="outline">Browse communities</Button></Link>} /></PageContainer>
 
   const group = groupQuery.data
   const match = recommendationsQuery.data?.find((recommendation) => recommendation.type === 'group' && recommendation.targetId === group.id)

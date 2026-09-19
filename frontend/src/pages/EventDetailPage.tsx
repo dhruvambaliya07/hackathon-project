@@ -13,6 +13,7 @@ import { PageContainer } from '@/components/common/page-container'
 import { eventService } from '@/services/eventService'
 import { groupService } from '@/services/groupService'
 import { recommendationService } from '@/services/recommendationService'
+import { ApiClientError } from '@/services/apiClient'
 
 export function EventDetailPage() {
   const { id } = useParams()
@@ -27,10 +28,12 @@ export function EventDetailPage() {
   function notify(message: string) { setToastMessage(message); window.setTimeout(() => setToastMessage(''), 2400) }
   function toggleInterested() { if (!id) return; const next = eventService.toggleInterested(id); setInterested(next); notify(next ? 'You are on the attendee list.' : 'Removed from your interested events.') }
   function addToCalendar() { if (!eventQuery.data) return; eventService.downloadCalendarEvent(eventQuery.data); notify('Calendar invite downloaded.') }
+  const eventNotFound = eventQuery.isError && eventQuery.error instanceof ApiClientError && eventQuery.error.status === 404
 
-  if (eventQuery.isPending || recommendationsQuery.isPending || allEventsQuery.isPending || groupQueryResult.isPending) return <PageContainer><LoadingState label="Loading event..." /></PageContainer>
+  if (eventQuery.isPending || recommendationsQuery.isPending || allEventsQuery.isPending || (Boolean(eventQuery.data) && groupQueryResult.isPending)) return <PageContainer><LoadingState label="Loading event..." /></PageContainer>
+  if (eventNotFound) return <PageContainer><EmptyState title="Event not found" detail="This event may have ended or moved. Explore the other plans coming up." action={<Link to="/events"><Button variant="outline">Browse events</Button></Link>} /></PageContainer>
   if (eventQuery.isError || recommendationsQuery.isError || allEventsQuery.isError || groupQueryResult.isError) return <PageContainer><ErrorState onRetry={() => { void eventQuery.refetch(); void recommendationsQuery.refetch(); void allEventsQuery.refetch(); void groupQueryResult.refetch() }} /></PageContainer>
-  if (!eventQuery.data) return <PageContainer><EmptyState title="Event not found" detail="This event may have ended or moved. Explore the other plans coming up." /></PageContainer>
+  if (!eventQuery.data) return <PageContainer><EmptyState title="Event not found" detail="This event may have ended or moved. Explore the other plans coming up." action={<Link to="/events"><Button variant="outline">Browse events</Button></Link>} /></PageContainer>
 
   const event = eventQuery.data
   const group = groupQueryResult.data
