@@ -32,3 +32,9 @@ The seed creates or updates 30 interests, 20 communities, 40 future events, 5 de
 ## Personalized icebreakers
 
 `POST /api/v1/icebreakers` accepts `user_id`, `target_type` (`group` or `event`), `target_id`, and `style` (`casual`, `friendly`, or `professional`). The response contains one short icebreaker. The backend uses only the user's interest names and public target details; provider failures use a deterministic template.
+
+## Profiles and recommendation feedback
+
+`GET /api/v1/profile/{user_id}` returns the public profile, weighted interests, goals, derived traits, groups marked `interested`, and events marked `interested`. `PUT` accepts `name`, `bio`, `interests`, and `goals`.
+
+`POST /api/v1/feedback` accepts a user-owned `recommendation_id` and one of `interested`, `not_interested`, `already_joined`, or `wrong_match`. Duplicate feedback of the same type is rejected. `interested` and `wrong_match` adjust matching interest weights by a bounded deterministic amount; the other feedback types record state without changing weights.
