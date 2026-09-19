@@ -40,6 +40,10 @@ CONTROLLED_INTERESTS = {
     "film studies",
     "data science",
     "mental wellness",
+    "sports",
+    "literature",
+    "cultural activities",
+    "social activities",
 }
 
 INTEREST_ALIASES = {
@@ -76,7 +80,9 @@ INTEREST_CATEGORIES = {
     "photography": "Creative", "filmmaking": "Creative", "graphic design": "Creative", "art": "Creative",
     "writing": "Creative", "drama": "Creative", "film studies": "Creative",
     "public speaking": "Social", "debate": "Social", "volunteering": "Social", "event management": "Social", "leadership": "Social",
-    "travel": "Lifestyle", "fitness": "Lifestyle", "yoga": "Lifestyle", "cooking": "Lifestyle", "mental wellness": "Lifestyle",
+    "travel": "Lifestyle", "fitness": "Lifestyle", "yoga": "Lifestyle", "cooking": "Lifestyle", "mental wellness": "Lifestyle", "sports": "Lifestyle",
+    "literature": "Creative",
+    "cultural activities": "Social", "social activities": "Social",
     "music": "Entertainment", "dance": "Entertainment", "gaming": "Entertainment",
     "entrepreneurship": "Business", "finance": "Business", "marketing": "Business",
 }

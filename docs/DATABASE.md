@@ -52,7 +52,7 @@ Run from `backend/` after migration:
 python -m app.seed
 ```
 
-The deterministic seed creates 30 interests, 20 groups, 40 events, 5 users, 100 group-interest links, 160 event-interest links, and 25 user-interest links. UUID5 identifiers and upsert behavior make repeated runs idempotent. This was verified by running the seed twice against clean PostgreSQL.
+The deterministic seed creates 34 normalized interests, 20 groups, 40 events, 5 users, 100 group-interest links, 160 event-interest links, and 25 user-interest links. Every group has explicit goal metadata used by recommendation ranking. Event dates begin at the fixed future anchor `2026-10-05` rather than using the current date, so repeated runs produce the same schedule. UUID5 identifiers and upsert behavior make repeated runs idempotent; this was verified by running the seed twice against SQLite.
 
 ## Frontend rule
 

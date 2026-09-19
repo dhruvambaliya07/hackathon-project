@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import Event, EventInterest, Group, GroupInterest, Interest, Recommendation, User, UserInterest
+from app.seed import GROUP_GOALS
 from app.services.ai_service import AIService
 from app.services.embedding_service import EmbeddingService
 from app.services.matching_service import Candidate, MatchingService, ScoringWeights, deterministic_explanation
@@ -149,7 +150,7 @@ class RecommendationService:
             description=group.description,
             embedding=group.embedding,
             interests=interests,
-            goals=CATEGORY_GOALS.get(group.category.lower(), frozenset()),
+            goals=GROUP_GOALS.get(group.name, CATEGORY_GOALS.get(group.category.lower(), frozenset())),
             group_relevance=0.0,
         )
 
@@ -163,7 +164,7 @@ class RecommendationService:
             description=event.description,
             embedding=event.embedding,
             interests=interests,
-            goals=CATEGORY_GOALS.get(event.group.category.lower(), frozenset()),
+            goals=GROUP_GOALS.get(event.group.name, CATEGORY_GOALS.get(event.group.category.lower(), frozenset())),
             start_time=event.start_time,
             group_relevance=min(1.0, sum(group_interests.values()) / 5),
         )

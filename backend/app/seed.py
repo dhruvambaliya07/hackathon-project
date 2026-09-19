@@ -15,6 +15,7 @@ from app.services.embedding_service import generate_deterministic_embedding
 
 SEED_NAMESPACE = uuid5(NAMESPACE_URL, "https://aatmoday.example/seed/v1")
 PLACEHOLDER_IMAGE = "https://placehold.co/1200x675/png?text={slug}"
+SEED_START_DATE = date(2026, 10, 5)
 
 INTEREST_DATA: tuple[tuple[str, str], ...] = (
     ("AI", "Technology"),
@@ -47,6 +48,10 @@ INTEREST_DATA: tuple[tuple[str, str], ...] = (
     ("Film Studies", "Creative"),
     ("Data Science", "Technology"),
     ("Mental Wellness", "Lifestyle"),
+    ("Sports", "Lifestyle"),
+    ("Literature", "Creative"),
+    ("Cultural Activities", "Social"),
+    ("Social Activities", "Social"),
 )
 
 COMMUNITY_DATA: tuple[tuple[str, str, str, str, tuple[tuple[str, float], ...]], ...] = (
@@ -57,20 +62,33 @@ COMMUNITY_DATA: tuple[tuple[str, str, str, str, tuple[tuple[str, float], ...]], 
     ("Street Lens Collective", "Creative", "Document campus life and city stories through thoughtful photography walks and critiques.", "Arts Courtyard", (("Photography", 1.0), ("Travel", 0.7), ("Filmmaking", 0.6), ("Art", 0.5), ("Writing", 0.4))),
     ("Frame by Frame", "Creative", "Learn visual storytelling from script to edit, with short films made by the community.", "Media Lab", (("Filmmaking", 1.0), ("Film Studies", 0.8), ("Photography", 0.6), ("Writing", 0.6), ("Drama", 0.5))),
     ("Design Commons", "Creative", "A critique-friendly studio for posters, interfaces, illustrations, and visual identities.", "Design Studio", (("Graphic Design", 1.0), ("Art", 0.8), ("Web Development", 0.5), ("Marketing", 0.5), ("Photography", 0.4))),
-    ("Open Mic Writers", "Creative", "Write bravely, read generously, and turn everyday observations into memorable stories.", "Library Forum", (("Writing", 1.0), ("Public Speaking", 0.7), ("Drama", 0.5), ("Film Studies", 0.4), ("Debate", 0.3))),
+    ("Open Mic Writers", "Creative", "Write bravely, read generously, and turn everyday observations into memorable stories.", "Library Forum", (("Writing", 1.0), ("Literature", 0.9), ("Public Speaking", 0.7), ("Drama", 0.5), ("Debate", 0.3))),
     ("Stagecraft Society", "Creative", "Rehearse scenes, improvise together, and make theatre welcoming to first-time performers.", "Black Box Theatre", (("Drama", 1.0), ("Dance", 0.7), ("Music", 0.6), ("Public Speaking", 0.5), ("Writing", 0.4))),
-    ("Campus Speakers", "Social", "Practice clear, confident communication through talks, storytelling, and constructive feedback.", "Seminar Hall", (("Public Speaking", 1.0), ("Leadership", 0.8), ("Debate", 0.7), ("Event Management", 0.5), ("Writing", 0.4))),
+    ("Campus Speakers", "Social", "Practice clear, confident communication through talks, storytelling, and constructive feedback.", "Seminar Hall", (("Public Speaking", 1.0), ("Leadership", 0.8), ("Debate", 0.7), ("Social Activities", 0.5), ("Writing", 0.4))),
     ("Civic Action Network", "Social", "Turn concern into action with student-led volunteering projects for local communities.", "Student Union", (("Volunteering", 1.0), ("Leadership", 0.8), ("Event Management", 0.7), ("Public Speaking", 0.5), ("Travel", 0.3))),
     ("Debate and Diplomacy", "Social", "Discuss big ideas, sharpen reasoning, and learn to disagree with curiosity and respect.", "Debate Room", (("Debate", 1.0), ("Public Speaking", 0.8), ("Leadership", 0.6), ("Writing", 0.4), ("Finance", 0.3))),
-    ("Trail and Travel Club", "Lifestyle", "Plan low-cost adventures, explore nearby places, and share practical travel skills.", "Campus Gate", (("Travel", 1.0), ("Fitness", 0.7), ("Photography", 0.6), ("Volunteering", 0.4), ("Cooking", 0.4))),
+    ("Trail and Travel Club", "Lifestyle", "Plan low-cost adventures, explore nearby places, and share practical travel skills.", "Campus Gate", (("Travel", 1.0), ("Sports", 0.8), ("Fitness", 0.7), ("Photography", 0.6), ("Volunteering", 0.4))),
     ("Mindful Movement", "Lifestyle", "Build sustainable routines through yoga, mobility, breathwork, and conversations about wellbeing.", "Wellness Lawn", (("Yoga", 1.0), ("Fitness", 0.7), ("Mental Wellness", 0.8), ("Dance", 0.4), ("Leadership", 0.3))),
-    ("Campus Kitchen", "Lifestyle", "Cook affordable, delicious meals together while learning techniques from many food traditions.", "Community Kitchen", (("Cooking", 1.0), ("Travel", 0.6), ("Event Management", 0.4), ("Volunteering", 0.4), ("Mental Wellness", 0.3))),
+    ("Campus Kitchen", "Lifestyle", "Cook affordable, delicious meals together while learning techniques from many food traditions.", "Community Kitchen", (("Cooking", 1.0), ("Cultural Activities", 0.9), ("Travel", 0.6), ("Event Management", 0.4), ("Volunteering", 0.4))),
     ("Rhythm House", "Entertainment", "Find your groove through collaborative music sessions, dance practice, and live showcases.", "Student Plaza", (("Music", 1.0), ("Dance", 0.9), ("Drama", 0.5), ("Event Management", 0.5), ("Public Speaking", 0.3))),
     ("Game Night Union", "Entertainment", "Play together, learn game design thinking, and host welcoming tournaments for all skill levels.", "Recreation Room", (("Gaming", 1.0), ("Programming", 0.6), ("Graphic Design", 0.5), ("Leadership", 0.4), ("Event Management", 0.4))),
     ("Founders Table", "Business", "Test ideas, meet collaborators, and learn the fundamentals of building responsible ventures.", "Business Lounge", (("Entrepreneurship", 1.0), ("Finance", 0.8), ("Marketing", 0.8), ("Leadership", 0.7), ("Public Speaking", 0.5))),
     ("Money Matters", "Business", "Make finance less intimidating through practical sessions on budgeting, investing, and careers.", "Commerce Room", (("Finance", 1.0), ("Entrepreneurship", 0.6), ("Data Science", 0.5), ("Debate", 0.3), ("Leadership", 0.3))),
     ("Brand Story Studio", "Business", "Blend strategy and creativity to help student projects communicate with clarity and purpose.", "Creative Enterprise Lab", (("Marketing", 1.0), ("Graphic Design", 0.7), ("Writing", 0.6), ("Entrepreneurship", 0.6), ("Photography", 0.4))),
 )
+
+GROUP_GOALS: dict[str, tuple[str, ...]] = {
+    "Aatmoday AI Lab": ("learn", "build_career"), "Robotics Makers": ("learn", "create"),
+    "Web Builders Guild": ("learn", "build_career"), "CyberSafe Circle": ("learn", "build_career"),
+    "Street Lens Collective": ("create", "meet_people"), "Frame by Frame": ("create", "learn"),
+    "Design Commons": ("create", "learn"), "Open Mic Writers": ("create", "perform"),
+    "Stagecraft Society": ("create", "perform", "meet_people"), "Campus Speakers": ("learn", "perform", "build_career"),
+    "Civic Action Network": ("help_community", "meet_people"), "Debate and Diplomacy": ("learn", "perform"),
+    "Trail and Travel Club": ("stay_active", "meet_people"), "Mindful Movement": ("stay_active", "relax"),
+    "Campus Kitchen": ("create", "meet_people"), "Rhythm House": ("create", "perform", "meet_people"),
+    "Game Night Union": ("relax", "meet_people"), "Founders Table": ("build_career", "learn", "meet_people"),
+    "Money Matters": ("learn", "build_career"), "Brand Story Studio": ("create", "build_career"),
+}
 
 USER_DATA: tuple[tuple[str, str, str, tuple[tuple[str, float], ...]], ...] = (
     ("Maya Shah", "maya.shah@example.test", "Photography and short films help me notice stories in ordinary places.", (("Photography", 1.0), ("Filmmaking", 0.9), ("Travel", 0.7), ("Public Speaking", 0.6), ("Volunteering", 0.5))),
@@ -141,7 +159,7 @@ def seed_database(session: Session) -> dict[str, int]:
         community = COMMUNITY_DATA[community_index]
         event_name = f"{community_name} {('Workshop', 'Showcase', 'Meetup', 'Open Session')[index % 4]} {index + 1:02d}"
         event_id = stable_id("event", event_name)
-        start_date = date.today() + timedelta(days=14 + index * 4)
+        start_date = SEED_START_DATE + timedelta(days=index * 4)
         start_time = datetime.combine(start_date, time(hour=10 + (index % 7)), tzinfo=timezone.utc)
         event_interests = tuple(name for name, _weight in community[4][: min(4, len(community[4]))])
         _upsert(session, Event, event_id, {
@@ -169,6 +187,7 @@ def seed_database(session: Session) -> dict[str, int]:
         "communities": len(COMMUNITY_DATA),
         "events": event_count,
         "users": len(USER_DATA),
+        "group_goals": len(GROUP_GOALS),
         "group_interests": sum(len(item[4]) for item in COMMUNITY_DATA),
         "event_interests": event_count * 4,
         "user_interests": sum(len(item[3]) for item in USER_DATA),
