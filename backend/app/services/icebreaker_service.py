@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import Event, EventInterest, Group, GroupInterest, User, UserInterest
+from app.schemas.icebreakers import AIIcebreakerResponse
 from app.services.ai_service import AIService
 
 TargetType = Literal["group", "event"]
@@ -30,8 +31,8 @@ class IcebreakerService:
         try:
             generated = await self.ai_service.generate_icebreaker(prompt_context)
             cleaned = " ".join(generated.split())
-            if 0 < len(cleaned) <= 280:
-                return cleaned
+            validated = AIIcebreakerResponse.model_validate({"icebreaker": cleaned})
+            return validated.icebreaker
         except Exception:
             pass
         return self._fallback(target_type, target, shared_interests, style)

@@ -63,7 +63,7 @@ Returns normalized interests with confidence, goals, traits, source, and origina
 }
 ```
 
-`target_type` is `group` or `event`; `style` is `casual`, `friendly`, or `professional`. Returns one short icebreaker.
+`target_type` is `group` or `event`; `style` is `casual`, `friendly`, or `professional`. The service loads the user's and target's interests for personalization, returns one short icebreaker, and never runs as part of recommendation generation.
 
 ### Profiles
 

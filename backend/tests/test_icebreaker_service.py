@@ -85,6 +85,36 @@ def test_ai_failure_uses_deterministic_shared_interest_fallback() -> None:
     assert first == second == "Hi there! I saw you're interested in Photography too. Are you joining the Lens Walk group?"
 
 
+def test_invalid_ai_response_uses_fallback() -> None:
+    ai = FakeAIService("")
+    service = service_for("group", ai)
+
+    result = asyncio.run(service.generate(uuid4(), "group", uuid4(), "casual"))
+
+    assert result == "Hey! I saw you're interested in Photography too. Are you joining the Lens Walk group?"
+
+
+def test_missing_shared_context_does_not_invent_interest() -> None:
+    ai = FakeAIService(RuntimeError("provider unavailable"))
+    service = service_for("event", ai)
+    service._load_user_interests = lambda user_id: set()  # type: ignore[method-assign]
+    service._load_target = lambda requested_type, target_id: (
+        SimpleNamespace(
+            name="Campus Mixer",
+            category="Social",
+            description="Meet students from across campus",
+            location="Student center",
+            start_time=SimpleNamespace(isoformat=lambda: "2026-10-01T10:00:00+00:00"),
+        ),
+        set(),
+    )  # type: ignore[method-assign]
+
+    result = asyncio.run(service.generate(uuid4(), "event", uuid4(), "friendly"))
+
+    assert result == "Hi there! What are you most looking forward to about the Campus Mixer event?"
+    assert "interested in" not in result
+
+
 def test_invalid_style_is_rejected_without_calling_service() -> None:
     client = TestClient(app)
     app.dependency_overrides[get_icebreaker_service] = lambda: None

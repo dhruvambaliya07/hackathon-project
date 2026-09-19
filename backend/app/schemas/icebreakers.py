@@ -1,7 +1,7 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 
 
 class IcebreakerRequest(BaseModel):
@@ -10,6 +10,11 @@ class IcebreakerRequest(BaseModel):
     target_type: Literal["group", "event"]
     target_id: UUID
     style: Literal["casual", "friendly", "professional"] = "casual"
+
+
+class AIIcebreakerResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    icebreaker: StrictStr = Field(min_length=1, max_length=280)
 
 
 class IcebreakerResult(BaseModel):
