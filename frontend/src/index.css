@@ -15,9 +15,20 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; background: hsl(var(--canvas)); color: hsl(var(--ink)); font-family: 'Manrope', sans-serif; }
+html, body, #root { min-width: 320px; overflow-x: hidden; }
+body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--ink)); font-family: 'Manrope', sans-serif; }
 button, input, textarea { font: inherit; }
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid hsl(var(--coral) / 0.75); outline-offset: 3px; }
 ::selection { background: hsl(var(--sun) / 0.35); }
+
+@media (max-width: 1023px) {
+  nav a { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
 
 @layer components {
   .page-grid { background-image: linear-gradient(hsl(var(--line) / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--line) / 0.3) 1px, transparent 1px); background-size: 32px 32px; }

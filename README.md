@@ -47,6 +47,8 @@ The `/profile` page shows interest strengths, goals, traits, saved communities, 
 
 Shared UX resilience includes skeleton loading with slow-network guidance, human-readable retry states, empty-state recovery actions, offline status messaging, route-level error recovery, invalid short-interest validation, AI/icebreaker generation errors, and image fallbacks for failed media.
 
+The responsive and accessibility pass covers 320px through 1440px layouts, visible keyboard focus, reduced-motion support, mobile dialog sizing, one-hand navigation targets, semantic route content, labeled controls, and no horizontal overflow across the verified routes.
+
 ## Backend integration status
 
 This checkout currently contains no FastAPI application, OpenAPI document, routes, or Pydantic schemas to inspect. Because no endpoint could be confirmed, the feature services keep their mock implementations isolated and do not make speculative network requests. Set `VITE_API_BASE_URL` when the backend is added, then map confirmed schemas in the service modules before enabling calls.

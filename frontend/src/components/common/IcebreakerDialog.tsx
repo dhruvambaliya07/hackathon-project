@@ -25,6 +25,7 @@ export function IcebreakerDialog({ open, onClose, interests, community, event }:
     const handleKeyDown = (keyboardEvent: KeyboardEvent) => { if (keyboardEvent.key === 'Escape') onClose() }
     window.addEventListener('keydown', handleKeyDown)
     void generate('friendly')
+    window.setTimeout(() => document.querySelector<HTMLButtonElement>('[aria-label="Close conversation starter"]')?.focus(), 0)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [open])
 
