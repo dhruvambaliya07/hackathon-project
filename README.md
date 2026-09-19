@@ -3,7 +3,7 @@ AI-powered hobby matchmaker for Aatmoday. Students describe their interests and 
 
 ## Database
 
-The backend uses PostgreSQL 16 with the `pgvector` extension. The initial Alembic migration creates:
+The backend uses standard PostgreSQL 16. Embeddings are optional JSON data in the MVP; structured interest matching is the required baseline. The initial Alembic migration creates:
 
 `users`, `interests`, `groups`, `group_interests`, `events`, `event_interests`, `user_interests`, `recommendations`, and `feedback`.
 

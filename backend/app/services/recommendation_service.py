@@ -120,7 +120,7 @@ class RecommendationService:
         groups = self.session.scalars(
             select(Group)
             .options(selectinload(Group.interests).selectinload(GroupInterest.interest))
-            .order_by(Group.embedding.cosine_distance(user_embedding).nullslast(), Group.name)
+            .order_by(Group.name)
             .limit(self.candidate_limit)
         ).unique().all()
         events = self.session.scalars(
@@ -129,7 +129,7 @@ class RecommendationService:
                 selectinload(Event.group).selectinload(Group.interests).selectinload(GroupInterest.interest),
                 selectinload(Event.interests).selectinload(EventInterest.interest),
             )
-            .order_by(Event.embedding.cosine_distance(user_embedding).nullslast(), Event.start_time)
+            .order_by(Event.start_time, Event.name)
             .limit(self.candidate_limit)
         ).unique().all()
         return [self._group_candidate(group) for group in groups] + [self._event_candidate(event) for event in events]

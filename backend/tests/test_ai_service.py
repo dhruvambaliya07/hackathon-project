@@ -31,8 +31,8 @@ def test_normal_structured_response_and_normalization(client: TestClient) -> Non
     app.dependency_overrides[get_ai_service] = lambda: service
     response = client.post("/api/v1/interests/analyze", json={"text": "I love taking photos"})
     assert response.status_code == 200
-    assert response.json()["data"]["interests"] == [{"name": "photography", "confidence": 0.94}]
-    assert response.json()["data"]["source"] == "ai"
+    assert response.json()["interests"] == [{"name": "photography", "confidence": 0.94}]
+    assert response.json()["source"] == "ai"
 
 
 def test_recoverable_json_wrapper_is_accepted(client: TestClient) -> None:
@@ -40,7 +40,7 @@ def test_recoverable_json_wrapper_is_accepted(client: TestClient) -> None:
     app.dependency_overrides[get_ai_service] = lambda: service
     response = client.post("/api/v1/interests/analyze", json={"text": "I enjoy coding"})
     assert response.status_code == 200
-    assert response.json()["data"]["interests"][0]["name"] == "programming"
+    assert response.json()["interests"][0]["name"] == "programming"
 
 
 def test_malformed_response_returns_controlled_502(client: TestClient) -> None:
@@ -48,7 +48,7 @@ def test_malformed_response_returns_controlled_502(client: TestClient) -> None:
     app.dependency_overrides[get_ai_service] = lambda: service
     response = client.post("/api/v1/interests/analyze", json={"text": "I enjoy photography"})
     assert response.status_code == 502
-    assert response.json()["error"]["code"] == "http_error"
+    assert response.json()["detail"] == "Interest analysis service is unavailable"
     assert "not json" not in response.text
 
 
@@ -57,8 +57,8 @@ def test_timeout_uses_keyword_fallback(client: TestClient) -> None:
     app.dependency_overrides[get_ai_service] = lambda: service
     response = client.post("/api/v1/interests/analyze", json={"text": "I love photography and coding"})
     assert response.status_code == 200
-    assert response.json()["data"]["source"] == "fallback"
-    assert {item["name"] for item in response.json()["data"]["interests"]} == {"photography", "programming"}
+    assert response.json()["source"] == "fallback"
+    assert {item["name"] for item in response.json()["interests"]} == {"photography", "programming"}
 
 
 def test_empty_and_huge_input_are_rejected(client: TestClient) -> None:

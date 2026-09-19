@@ -1,17 +1,17 @@
 # Architecture
 
-Aatmoday Connect is a FastAPI application backed by PostgreSQL 16 and pgvector. The frontend is a Vite React application.
+Aatmoday Connect is a FastAPI application backed by PostgreSQL 16. The frontend is a Vite React application.
 
 ## Backend layers
 
-- `app/api/v1`: thin HTTP routes, dependency wiring, validation-to-status translation, and response envelopes.
+- `app/api/v1`: thin HTTP routes, dependency wiring, and status translation.
 - `app/schemas`: Pydantic request and response contracts.
 - `app/services`: business logic for analysis, embeddings, matching, recommendations, icebreakers, profiles, feedback, and catalog queries.
 - `app/models`: SQLAlchemy persistence models and relationships.
 - `app/db`: engine/session lifecycle and declarative metadata.
 - `migrations`: Alembic schema history.
 
-Routes receive a request, resolve a session/service dependency, call one service operation, and return an `ApiResponse`. Provider calls and state changes are kept out of route handlers.
+Routes receive a request, resolve a session/service dependency, call one service operation, and return the service schema directly. Provider calls and state changes are kept out of route handlers.
 
 ## End-to-end flow
 
@@ -19,7 +19,7 @@ Routes receive a request, resolve a session/service dependency, call one service
 2. The AI service returns validated structured interests, goals, and traits, or keyword fallback output.
 3. Recognized interests are persisted with bounded weights.
 4. One embedding is generated; the provider has a deterministic fallback.
-5. PostgreSQL/pgvector retrieves bounded group and event candidate sets.
+5. PostgreSQL retrieves bounded group and event candidate sets; structured interest matching is the required baseline.
 6. Local matching calculates semantic, interest, goal, and event relevance signals.
 7. Candidates are ranked and stored as recommendation records.
 8. The client opens the target, requests an icebreaker, and submits feedback using the recommendation ID.
@@ -31,7 +31,7 @@ Routes receive a request, resolve a session/service dependency, call one service
 
 ## Error handling
 
-Request validation is normalized by the application handler. HTTP details are not returned to clients. Unexpected errors return a generic internal error envelope. Provider-specific recommendation failures return safe `502`; recommendation storage failures return `503`. Health reports only status, database availability, and version.
+Request validation uses FastAPI's standard `422` response. HTTP details are not returned to clients. Unexpected errors return a generic `detail`. Provider-specific recommendation failures return safe `502`; recommendation storage failures return `503`. Health reports only status, database availability, and version.
 
 ## Testing
 

@@ -21,7 +21,7 @@ def test_cosine_similarity_and_missing_embeddings() -> None:
     assert cosine_similarity([0.0, 0.0], [1.0, 0.0]) is None
 
 
-def test_cosine_similarity_accepts_pgvector_array_like_values() -> None:
+def test_cosine_similarity_accepts_array_like_values() -> None:
     class ArrayLike(list[float]):
         def __bool__(self) -> bool:
             raise ValueError("array truth value is ambiguous")

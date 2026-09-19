@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, ForeignKeyConstraint
+from sqlalchemy import CheckConstraint, ForeignKeyConstraint, JSON
 
 from app.db.base import Base, EMBEDDING_DIMENSION
 from app.models import Event, Feedback, Group, Interest, Recommendation, User
@@ -19,8 +19,8 @@ def test_requested_tables_are_registered() -> None:
 
 
 def test_vector_columns_use_selected_dimension() -> None:
-    assert Group.__table__.c.embedding.type.dim == EMBEDDING_DIMENSION
-    assert Event.__table__.c.embedding.type.dim == EMBEDDING_DIMENSION
+    assert isinstance(Group.__table__.c.embedding.type, JSON)
+    assert isinstance(Event.__table__.c.embedding.type, JSON)
 
 
 def test_integrity_constraints_and_foreign_keys_exist() -> None:

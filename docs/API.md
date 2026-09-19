@@ -2,13 +2,7 @@
 
 Base URL: `/api/v1`
 
-All responses use the envelope:
-
-```json
-{"data": {}, "meta": {}, "error": null}
-```
-
-Errors use the same envelope with `data: null` and a safe `error.code` such as `validation_error`, `http_error`, or `internal_error`. The OpenAPI document is available at `/openapi.json`.
+Responses use the endpoint's normal JSON body and FastAPI's standard error shape, for example `{"detail": "..."}`. The OpenAPI document is available at `/openapi.json`.
 
 ## Endpoints
 

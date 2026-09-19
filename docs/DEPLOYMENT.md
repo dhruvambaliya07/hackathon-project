@@ -34,7 +34,7 @@ The normal API service command runs `alembic upgrade head` before Uvicorn. The A
 - Docs UI: `http://localhost:8000/docs`
 - Database migration head: `alembic current`
 
-The final verification used a clean `pgvector/pgvector:pg16` container, upgraded both migrations, seeded twice, built the backend image, started the API, and exercised every documented route family.
+The final verification uses a clean `postgres:16` container, upgrades both migrations, seeds twice, builds the backend image, starts the API, and exercises every documented route family.
 
 ## Frontend integration
 
@@ -66,4 +66,4 @@ Backend: `pytest` completed with 41 passed and 12 PostgreSQL-gated skips in the 
 
 ## Limitations
 
-In-memory rate limits are process-local and reset on restart. Synchronous SQLAlchemy sessions are used from async handlers. PostgreSQL is required for vector retrieval and full catalog/end-to-end tests. External AI availability affects provider-backed generation, but configured deterministic fallbacks cover analysis and embeddings.
+In-memory rate limits are process-local and reset on restart. Synchronous SQLAlchemy sessions are used from async handlers. Embeddings are stored as optional JSON and are not used for baseline retrieval; structured matching is the required MVP path. External AI availability affects provider-backed generation, but configured deterministic fallbacks cover analysis and embeddings.

@@ -45,14 +45,14 @@ def _group_filters(query, *, search: str | None, category: str | None, interest:
 
 
 def list_groups(session: Session, *, search: str | None, category: str | None, interest: str | None, page: int, page_size: int) -> tuple[list[GroupSummary], int]:
-    base_query = _group_filters(select(Group.id), search=search, category=category, interest=interest).distinct()
+    base_query = _group_filters(select(Group.id), search=search, category=category, interest=interest)
     total = session.scalar(select(func.count()).select_from(base_query.subquery())) or 0
     groups_query = _group_filters(
         select(Group).options(selectinload(Group.interests).selectinload(GroupInterest.interest)),
         search=search,
         category=category,
         interest=interest,
-    ).distinct().order_by(Group.name).offset((page - 1) * page_size).limit(page_size)
+    ).order_by(Group.name).offset((page - 1) * page_size).limit(page_size)
     groups = session.scalars(groups_query).unique().all()
     return [_group_summary(group) for group in groups], total
 
@@ -93,7 +93,7 @@ def _event_filters(query, *, search: str | None, group_id: UUID | None, category
 
 
 def list_events(session: Session, *, search: str | None, group_id: UUID | None, category: str | None, from_date: datetime | None, to_date: datetime | None, page: int, page_size: int) -> tuple[list[EventSummary], int]:
-    base_query = _event_filters(select(Event.id), search=search, group_id=group_id, category=category, from_date=from_date, to_date=to_date).distinct()
+    base_query = _event_filters(select(Event.id), search=search, group_id=group_id, category=category, from_date=from_date, to_date=to_date)
     total = session.scalar(select(func.count()).select_from(base_query.subquery())) or 0
     events_query = _event_filters(
         select(Event).options(selectinload(Event.group)),
@@ -102,7 +102,7 @@ def list_events(session: Session, *, search: str | None, group_id: UUID | None, 
         category=category,
         from_date=from_date,
         to_date=to_date,
-    ).distinct().order_by(Event.start_time, Event.name).offset((page - 1) * page_size).limit(page_size)
+    ).order_by(Event.start_time, Event.name).offset((page - 1) * page_size).limit(page_size)
     events = session.scalars(events_query).unique().all()
     return [_event_summary(event) for event in events], total
 

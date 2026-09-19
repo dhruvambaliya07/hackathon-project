@@ -2,7 +2,6 @@
 
 from alembic import op
 import sqlalchemy as sa
-from pgvector.sqlalchemy import Vector
 from sqlalchemy.dialects import postgresql
 
 revision = "0001_initial"
@@ -14,8 +13,6 @@ EMBEDDING_DIMENSION = 1536
 
 
 def upgrade() -> None:
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
-
     op.create_table(
         "users",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
@@ -50,7 +47,7 @@ def upgrade() -> None:
         sa.Column("location", sa.String(200), nullable=True),
         sa.Column("meeting_frequency", sa.String(80), nullable=True),
         sa.Column("member_count", sa.Integer(), server_default="0", nullable=False),
-        sa.Column("embedding", Vector(EMBEDDING_DIMENSION), nullable=True),
+        sa.Column("embedding", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.CheckConstraint("member_count >= 0", name="ck_groups_member_count_nonnegative"),
@@ -79,7 +76,7 @@ def upgrade() -> None:
         sa.Column("location", sa.String(200), nullable=False),
         sa.Column("capacity", sa.Integer(), nullable=True),
         sa.Column("image_url", sa.String(500), nullable=True),
-        sa.Column("embedding", Vector(EMBEDDING_DIMENSION), nullable=True),
+        sa.Column("embedding", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.CheckConstraint("capacity IS NULL OR capacity >= 0", name="ck_events_capacity_nonnegative"),
@@ -148,4 +145,3 @@ def downgrade() -> None:
     op.drop_table("groups")
     op.drop_table("interests")
     op.drop_table("users")
-    op.execute("DROP EXTENSION IF EXISTS vector")

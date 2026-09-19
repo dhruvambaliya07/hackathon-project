@@ -14,7 +14,7 @@ The engine combines:
 
 ## Retrieval
 
-PostgreSQL/pgvector retrieves at most 100 groups and 100 events ordered by vector cosine distance. Candidate relationships are eager-loaded to avoid an N+1 query per candidate.
+PostgreSQL retrieves at most 100 groups and 100 events with deterministic ordering. Candidate relationships are eager-loaded to avoid an N+1 query per candidate. Optional embeddings are retained as JSON for future vector indexing but are not required by the MVP.
 
 ## Scoring
 

@@ -51,7 +51,7 @@ def test_profile_update_rejects_oversized_interest_lists() -> None:
     )
 
     assert response.status_code == 422
-    assert response.json()["error"]["code"] == "validation_error"
+    assert response.json()["detail"]
 
 
 def test_cors_configuration_rejects_wildcard() -> None:

@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from app.api.rate_limit import limit_recommendations
 from app.config import get_settings
 from app.db.session import get_db
-from app.schemas.common import ApiResponse
 from app.schemas.recommendations import RecommendationItem, RecommendationRequest, RecommendationResult
 from app.services.embedding_service import DeterministicEmbeddingProvider, OpenAICompatibleEmbeddingProvider, ProviderEmbeddingService, ResilientEmbeddingService
 from app.services.ai_service import AIService
@@ -29,8 +28,8 @@ def get_recommendation_service(session: Session = Depends(get_db), ai_service: A
     return RecommendationService(session, ResilientEmbeddingService(primary, fallback), ai_service, weights=weights)
 
 
-@router.post("", response_model=ApiResponse[RecommendationResult], summary="Get hobby group and event recommendations")
-async def create_recommendations(request: RecommendationRequest, _: None = Depends(limit_recommendations), service: RecommendationService = Depends(get_recommendation_service)) -> ApiResponse[RecommendationResult]:
+@router.post("", response_model=RecommendationResult, summary="Get hobby group and event recommendations")
+async def create_recommendations(request: RecommendationRequest, _: None = Depends(limit_recommendations), service: RecommendationService = Depends(get_recommendation_service)) -> RecommendationResult:
     try:
         items = await service.recommend(request.user_id, request.interest_text, request.limit)
     except RecommendationUserNotFound as exc:
@@ -39,4 +38,4 @@ async def create_recommendations(request: RecommendationRequest, _: None = Depen
         raise HTTPException(status_code=503, detail="Recommendation storage is temporarily unavailable") from exc
     except Exception as exc:
         raise HTTPException(status_code=502, detail="Recommendation providers are unavailable") from exc
-    return ApiResponse(data=RecommendationResult(recommendations=[RecommendationItem.model_validate(item) for item in items]))
+    return RecommendationResult(recommendations=[RecommendationItem.model_validate(item) for item in items])

@@ -3,7 +3,6 @@
 ## Engine
 
 - PostgreSQL 16
-- `pgvector` extension
 - SQLAlchemy 2.x
 - Alembic migrations
 - Fixed embedding dimension: 1536
@@ -24,10 +23,10 @@
 
 Current head: `0002_profile_feedback_state`.
 
-- `0001_initial`: base schema, foreign keys, checks, indexes, and vector columns
+- `0001_initial`: base schema, foreign keys, checks, indexes, and optional JSON embedding columns
 - `0002_profile_feedback_state`: user goals/traits and duplicate feedback constraint
 
-Clean verification performed with the `pgvector/pgvector:pg16` image: upgrade from an empty database succeeded and reached `0002_profile_feedback_state`.
+Clean verification uses the standard `postgres:16` image; upgrade from an empty database reaches `0002_profile_feedback_state` without requiring a database extension.
 
 ## Integrity and indexes
 

@@ -71,7 +71,10 @@ export class ApiClient {
 
 export const apiClient = new ApiClient()
 
-export function unwrapApiResponse<T>(response: ApiEnvelope<T>): T {
+export function unwrapApiResponse<T>(response: T | ApiEnvelope<T>): T {
+  if (!response || typeof response !== 'object' || !('data' in response) || !('error' in response)) {
+    return response as T
+  }
   if (response.error || response.data === null) {
     throw new ApiClientError(response.error?.message ?? 'The API returned no data.', 500, response.error)
   }
