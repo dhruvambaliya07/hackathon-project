@@ -1,0 +1,3 @@
+import { Card } from '@/components/ui/card'
+
+export function RecommendationSkeleton({ compact = false }: { compact?: boolean }) { return <Card className="animate-pulse overflow-hidden"><div className={`bg-ink/5 ${compact ? 'h-36' : 'h-52'}`} /><div className="space-y-3 p-5"><div className="h-3 w-24 rounded-full bg-ink/10" /><div className="h-6 w-3/4 rounded-full bg-ink/10" /><div className="h-3 w-full rounded-full bg-ink/10" /><div className="h-3 w-5/6 rounded-full bg-ink/10" /><div className="flex gap-2 pt-2"><div className="h-7 w-20 rounded-full bg-ink/10" /><div className="h-7 w-24 rounded-full bg-ink/10" /></div></div></Card> }

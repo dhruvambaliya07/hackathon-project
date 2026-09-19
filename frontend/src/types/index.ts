@@ -81,6 +81,7 @@ export interface Recommendation {
   subtitle: string
   imageUrl: string
   matchScore: number
+  matchedInterests: string[]
   reasons: RecommendationReason[]
   icebreakers: Icebreaker[]
 }
