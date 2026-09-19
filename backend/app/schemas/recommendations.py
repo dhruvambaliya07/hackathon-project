@@ -12,9 +12,13 @@ class RecommendationRequest(BaseModel):
 class RecommendationItem(BaseModel):
     id: UUID
     type: str
+    target_type: str
+    target_id: UUID
     title: str
     description: str
-    score: float = Field(ge=0, le=1)
+    score: float = Field(ge=0, le=100)
+    matched_interests: list[str] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
     explanation: str
 
 

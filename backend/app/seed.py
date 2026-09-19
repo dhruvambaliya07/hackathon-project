@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
 from app.models import Event, EventInterest, Group, GroupInterest, Interest, User, UserInterest
+from app.services.embedding_service import generate_deterministic_embedding
 
 SEED_NAMESPACE = uuid5(NAMESPACE_URL, "https://aatmoday.example/seed/v1")
 PLACEHOLDER_IMAGE = "https://placehold.co/1200x675/png?text={slug}"
@@ -128,6 +129,7 @@ def seed_database(session: Session) -> dict[str, int]:
             "meeting_frequency": "Every two weeks",
             "member_count": 12 + len(name) % 57,
             "image_url": PLACEHOLDER_IMAGE.format(slug=slugify(name)),
+            "embedding": generate_deterministic_embedding(f"{name}. {description}. {category}"),
         })
         _replace_group_interests(session, identifier, interest_ids, interests)
 
@@ -151,6 +153,7 @@ def seed_database(session: Session) -> dict[str, int]:
             "location": community[3],
             "capacity": 20 + (index % 5) * 10,
             "image_url": PLACEHOLDER_IMAGE.format(slug=slugify(event_name)),
+            "embedding": generate_deterministic_embedding(f"{event_name}. {community[2]}. {community[1]}. {community[3]}"),
         })
         _replace_event_interests(session, event_id, interest_ids, event_interests)
 
