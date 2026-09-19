@@ -1,6 +1,9 @@
 import { groups } from '@/data/mockData'
 import type { Group } from '@/types'
 
+export type GroupListResponse = Group[]
+export type GroupDetailResponse = Group | undefined
+
 export interface GroupService {
   list(): Promise<Group[]>
   getById(id: string): Promise<Group | undefined>

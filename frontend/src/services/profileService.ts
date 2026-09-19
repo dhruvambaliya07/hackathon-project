@@ -1,5 +1,8 @@
 import type { Interest, InterestProfile } from '@/types'
 
+export interface ProfileInterestUpdateRequest { interests: string[] }
+export type ProfileResponse = InterestProfile
+
 export interface ProfileService {
   getProfile(): Promise<InterestProfile>
   updateInterests(interests: string[]): Promise<InterestProfile>
@@ -43,7 +46,7 @@ function writeProfile(profile: InterestProfile) {
 
 export const profileService: ProfileService = {
   async getProfile() { return readProfile() },
-  async updateInterests(interests) {
+  async updateInterests(interests: ProfileInterestUpdateRequest['interests']) {
     const current = readProfile()
     const nextSignals = interests.map((name, index) => {
       const existing = current.signals.find((signal) => signal.name.toLowerCase() === name.toLowerCase())

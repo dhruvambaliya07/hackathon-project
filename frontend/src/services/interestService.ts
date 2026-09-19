@@ -1,5 +1,8 @@
 import type { InterestProfile } from '@/types'
 
+export interface InterestAnalysisRequest { description: string }
+export type InterestAnalysisResponse = InterestProfile
+
 export interface InterestService {
   analyze(description: string): Promise<InterestProfile>
   createManualProfile(interests: string[]): InterestProfile
@@ -21,7 +24,7 @@ const mockProfile: Omit<InterestProfile, 'prompt'> = {
 }
 
 const mockInterestService: InterestService = {
-  async analyze(description) {
+  async analyze(description: InterestAnalysisRequest['description']) {
     if (!description.trim()) {
       throw new Error('Tell us a little more about what you are into.')
     }

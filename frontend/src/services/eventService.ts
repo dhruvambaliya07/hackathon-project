@@ -1,6 +1,9 @@
 import { events } from '@/data/mockData'
 import type { Event } from '@/types'
 
+export type EventListResponse = Event[]
+export type EventDetailResponse = Event | undefined
+
 export interface EventService {
   list(): Promise<Event[]>
   getById(id: string): Promise<Event | undefined>

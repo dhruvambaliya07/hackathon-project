@@ -2,6 +2,8 @@ import { events, groups, recommendations } from '@/data/mockData'
 import { profileService } from '@/services/profileService'
 import type { InterestProfile, Recommendation } from '@/types'
 
+export type RecommendationListResponse = Recommendation[]
+
 export interface RecommendationService {
   list(): Promise<Recommendation[]>
   getInterestProfile(): Promise<InterestProfile>
