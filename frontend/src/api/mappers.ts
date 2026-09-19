@@ -22,7 +22,7 @@ export function mapRecommendation(recommendation: ApiRecommendation): Recommenda
 }
 
 export function mapAnalysis(analysis: ApiInterestAnalysis): InterestProfile {
-  return { userId: '', prompt: analysis.original_text, tags: analysis.interests.map((interest, index) => mapInterest({ id: interest.name.toLowerCase(), name: interest.name, category: 'Interest', weight: interest.confidence }, index)), signals: analysis.interests.map((interest, index) => ({ ...mapInterest({ id: interest.name.toLowerCase(), name: interest.name, category: 'Interest', weight: interest.confidence }, index), score: Math.round(interest.confidence * 100) })), goals: analysis.goals, traits: analysis.traits, explanation: analysis.source === 'fallback' ? 'This profile was created using a deterministic fallback while AI was unavailable.' : 'This profile was extracted from your interests.', updatedAt: new Date().toISOString() }
+  return { userId: '', prompt: analysis.original_text, tags: analysis.interests.map((interest, index) => mapInterest({ id: interest.name.toLowerCase(), name: interest.name, category: interest.category, weight: interest.confidence }, index)), signals: analysis.interests.map((interest, index) => ({ ...mapInterest({ id: interest.name.toLowerCase(), name: interest.name, category: interest.category, weight: interest.confidence }, index), score: Math.round(interest.confidence * 100) })), goals: analysis.goals, traits: [...analysis.traits, ...analysis.preferences], explanation: analysis.source === 'fallback' ? 'This profile was created using a deterministic fallback while AI was unavailable.' : 'This profile was extracted from your interests.', updatedAt: new Date().toISOString() }
 }
 
 export function mapProfile(profile: ApiProfile): InterestProfile {

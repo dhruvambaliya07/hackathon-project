@@ -18,7 +18,22 @@ class InterestAnalyzeRequest(BaseModel):
 
 class AnalyzedInterest(BaseModel):
     name: str = Field(min_length=1, max_length=120)
+    category: str = Field(min_length=1, max_length=80)
     confidence: float = Field(ge=0, le=1)
+
+
+class AIInterest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=120)
+    confidence: float = Field(default=0.7, ge=0, le=1)
+
+
+class AIInterestAnalysis(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    interests: list[AIInterest] = Field(default_factory=list)
+    goals: list[str] = Field(default_factory=list)
+    traits: list[str] = Field(default_factory=list)
+    preferences: list[str] = Field(default_factory=list)
 
 
 class InterestAnalysis(BaseModel):
@@ -26,4 +41,5 @@ class InterestAnalysis(BaseModel):
     interests: list[AnalyzedInterest] = Field(default_factory=list)
     goals: list[str] = Field(default_factory=list)
     traits: list[str] = Field(default_factory=list)
+    preferences: list[str] = Field(default_factory=list)
     source: Literal["ai", "fallback"] = "ai"

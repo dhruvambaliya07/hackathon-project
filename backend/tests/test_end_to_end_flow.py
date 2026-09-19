@@ -30,7 +30,7 @@ class JourneyAI:
     async def analyze_interests(self, text: str) -> InterestAnalysis:
         return InterestAnalysis(
             original_text=text,
-            interests=[AnalyzedInterest(name="Photography", confidence=0.95)],
+            interests=[AnalyzedInterest(name="Photography", category="Creative", confidence=0.95)],
             goals=["create"],
             traits=["creative"],
             source="ai",

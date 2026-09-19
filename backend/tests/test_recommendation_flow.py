@@ -37,7 +37,7 @@ class FakeAI:
             raise self.failure
         return InterestAnalysis(
             original_text=text,
-            interests=[AnalyzedInterest(name="Photography", confidence=0.9)],
+            interests=[AnalyzedInterest(name="Photography", category="Creative", confidence=0.9)],
             source="ai",
         )
 

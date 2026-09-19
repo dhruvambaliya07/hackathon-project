@@ -10,6 +10,6 @@ export interface ApiGroup { id: string; name: string; description: string; categ
 export interface ApiEvent { id: string; group_id: string; title: string; description: string; starts_at: string; ends_at: string | null; location: string; capacity: number | null; image_url: string | null }
 export interface ApiRecommendation { id: string; type: string; target_type: 'group' | 'event'; target_id: string; title: string; description: string; score: number; matched_interests: string[]; matched_goals: string[]; reasons: string[]; explanation: string }
 export interface ApiProfile { user: ApiUser; interests: ApiInterest[]; goals: string[]; traits: string[]; saved_groups: ApiGroup[]; interested_events: ApiEvent[] }
-export interface ApiInterestAnalysis { original_text: string; interests: Array<{ name: string; confidence: number }>; goals: string[]; traits: string[]; source: 'ai' | 'fallback' }
+export interface ApiInterestAnalysis { original_text: string; interests: Array<{ name: string; category: string; confidence: number }>; goals: string[]; traits: string[]; preferences: string[]; source: 'ai' | 'fallback' }
 export interface ApiIcebreaker { icebreaker: string; style: 'casual' | 'friendly' | 'professional' }
 export interface ApiFeedback { accepted: boolean; feedback_type: 'interested' | 'not_interested' | 'already_joined' | 'wrong_match' }

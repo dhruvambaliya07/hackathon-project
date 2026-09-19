@@ -2,9 +2,9 @@
 
 ## Interest extraction
 
-`StructuredAIService` sends one analysis request for free-form interest text and validates the returned JSON through `InterestAnalysis` and `parse_analysis`. Only the controlled vocabulary, allowed goals, and allowed traits are accepted. Unknown interests are discarded.
+`POST /api/v1/interests/analyze` sends one analysis request for free-form interest text through `StructuredAIService`. The provider payload is first validated with the Pydantic `AIInterestAnalysis` schema, then aliases are normalized to the controlled vocabulary and duplicate interests keep their highest confidence. Only allowed goals, traits, and preferences are accepted; unknown interests are discarded.
 
-If the provider times out or returns a provider-level failure, `KeywordFallbackAIService` performs deterministic keyword matching. Malformed structured output is converted to a safe provider error at the API boundary.
+If the provider times out, fails, or returns malformed structured output, `KeywordFallbackAIService` performs deterministic keyword matching. The API exposes only the normalized analysis and its `ai` or `fallback` source marker; provider errors and implementation details are never returned.
 
 ## Embeddings
 
