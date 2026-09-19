@@ -38,3 +38,7 @@ The seed creates or updates 30 interests, 20 communities, 40 future events, 5 de
 `GET /api/v1/profile/{user_id}` returns the public profile, weighted interests, goals, derived traits, groups marked `interested`, and events marked `interested`. `PUT` accepts `name`, `bio`, `interests`, and `goals`.
 
 `POST /api/v1/feedback` accepts a user-owned `recommendation_id` and one of `interested`, `not_interested`, `already_joined`, or `wrong_match`. Duplicate feedback of the same type is rejected. `interested` and `wrong_match` adjust matching interest weights by a bounded deterministic amount; the other feedback types record state without changing weights.
+
+## Integrated recommendation flow
+
+The recommendation endpoint validates the user, analyzes free-form interest text, persists recognized interests, generates an embedding with a deterministic fallback, retrieves groups and events, calculates hybrid scores, persists recommendation records, and returns evidence-based reasons. Those recommendation IDs feed the icebreaker and feedback endpoints, so interested feedback is reflected in the next profile response. Provider failures return safe API errors or use local deterministic fallbacks; private provider details are never returned.

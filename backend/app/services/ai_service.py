@@ -80,6 +80,8 @@ class AIProvider(Protocol):
 
 
 class AIService(Protocol):
+    async def analyze_interests(self, text: str) -> InterestAnalysis: ...
+
     async def generate_icebreaker(self, context: str) -> str: ...
 
 

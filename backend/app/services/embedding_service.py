@@ -80,8 +80,3 @@ class ResilientEmbeddingService:
 class StubEmbeddingService(ProviderEmbeddingService):
     def __init__(self) -> None:
         super().__init__(DeterministicEmbeddingProvider())
-
-
-class StubEmbeddingService:
-    async def embed(self, text: str) -> list[float]:
-        return []

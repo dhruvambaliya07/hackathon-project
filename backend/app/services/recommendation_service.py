@@ -3,11 +3,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.models import Event, EventInterest, Group, GroupInterest, User, UserInterest
-from app.services.ai_service import fallback_analysis
+from app.models import Event, EventInterest, Group, GroupInterest, Interest, Recommendation, User, UserInterest
+from app.services.ai_service import AIService
 from app.services.embedding_service import EmbeddingService
 from app.services.matching_service import Candidate, MatchingService, ScoringWeights, deterministic_explanation
 
@@ -22,18 +22,20 @@ CATEGORY_GOALS: Mapping[str, frozenset[str]] = {
 
 
 class RecommendationService:
-    def __init__(self, session: Session, embedding_service: EmbeddingService, weights: ScoringWeights | None = None, candidate_limit: int = 100) -> None:
+    def __init__(self, session: Session, embedding_service: EmbeddingService, ai_service: AIService, weights: ScoringWeights | None = None, candidate_limit: int = 100) -> None:
         self.session = session
         self.embedding_service = embedding_service
+        self.ai_service = ai_service
         self.matcher = MatchingService(weights)
         self.candidate_limit = candidate_limit
 
     async def recommend(self, user_id: UUID | None, interest_text: str, limit: int) -> list[dict[str, object]]:
-        user_embedding = await self.embedding_service.generate_embedding(interest_text)
         user_interests, profile_goals = self._load_profile(user_id)
-        analysis = fallback_analysis(interest_text)
+        analysis = await self.ai_service.analyze_interests(interest_text)
+        self._store_analysis(user_id, analysis)
+        user_embedding = await self.embedding_service.generate_embedding(interest_text)
         for item in analysis.interests:
-            user_interests[item.name] = max(user_interests.get(item.name, 0.0), item.confidence)
+            user_interests[item.name.lower()] = max(user_interests.get(item.name.lower(), 0.0), item.confidence)
         user_goals = set(profile_goals) | set(analysis.goals)
 
         candidates = self._retrieve_candidates(user_embedding)
@@ -60,7 +62,24 @@ class RecommendationService:
                 "explanation": deterministic_explanation(breakdown),
             }))
         ranked.sort(key=lambda item: (-item[0], str(item[1]["target_id"])))
-        return [item for _score, item in ranked[:limit]]
+        results: list[dict[str, object]] = []
+        stored: list[tuple[Recommendation, dict[str, object]]] = []
+        for score, item in ranked[:limit]:
+            recommendation = Recommendation(
+                user_id=user_id,
+                target_type=str(item["target_type"]),
+                target_id=item["target_id"],
+                score=max(0.0, min(1.0, score / 100)),
+                reason={"matched_interests": item["matched_interests"], "reasons": item["reasons"]},
+            )
+            self.session.add(recommendation)
+            stored.append((recommendation, item))
+        self.session.flush()
+        for recommendation, item in stored:
+            item["id"] = recommendation.id
+            results.append(item)
+        self.session.commit()
+        return results
 
     def _load_profile(self, user_id: UUID | None) -> tuple[dict[str, float], set[str]]:
         if user_id is None:
@@ -69,10 +88,33 @@ class RecommendationService:
             select(User).where(User.id == user_id).options(selectinload(User.interests).selectinload(UserInterest.interest))
         )
         if user is None:
-            return {}, set()
+            raise RecommendationUserNotFound("user not found")
         interests = {link.interest.name.lower(): link.weight for link in user.interests}
         goals = set().union(*(CATEGORY_GOALS.get(link.interest.category.lower(), frozenset()) for link in user.interests))
         return interests, goals
+
+    def _store_analysis(self, user_id: UUID | None, analysis) -> None:
+        if user_id is None:
+            return
+        interests = self.session.scalars(
+            select(Interest).where(func.lower(Interest.name).in_([item.name.lower() for item in analysis.interests]))
+        ).all()
+        by_name = {interest.name.lower(): interest for interest in interests}
+        user = self.session.get(User, user_id)
+        if user is None:
+            raise RecommendationUserNotFound("user not found")
+        links = {link.interest_id: link for link in user.interests}
+        for item in analysis.interests:
+            interest = by_name.get(item.name.lower())
+            if interest is None:
+                continue
+            link = links.get(interest.id)
+            if link is None:
+                self.session.add(UserInterest(user_id=user_id, interest_id=interest.id, weight=item.confidence, source=analysis.source))
+            else:
+                link.weight = max(link.weight, item.confidence)
+                link.source = analysis.source
+        self.session.flush()
 
     def _retrieve_candidates(self, user_embedding: list[float]) -> list[Candidate]:
         groups = self.session.scalars(
@@ -119,6 +161,10 @@ class RecommendationService:
             start_time=event.start_time,
             group_relevance=min(1.0, sum(group_interests.values()) / 5),
         )
+
+
+class RecommendationUserNotFound(Exception):
+    pass
 
 
 def _reason_list(evidence: dict[str, object]) -> list[str]:

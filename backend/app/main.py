@@ -21,7 +21,11 @@ app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origin_list, allo
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-    payload = ApiResponse[None](error=ApiError(code="validation_error", message="Request validation failed.", details={"fields": exc.errors()}))
+    fields = [
+        {"loc": list(error.get("loc", ())), "type": error.get("type", "validation_error"), "msg": error.get("msg", "Invalid value")}
+        for error in exc.errors()
+    ]
+    payload = ApiResponse[None](error=ApiError(code="validation_error", message="Request validation failed.", details={"fields": fields}))
     return JSONResponse(status_code=422, content=payload.model_dump(mode="json"))
 
 
