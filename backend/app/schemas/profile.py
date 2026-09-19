@@ -1,14 +1,21 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ProfileUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=160)
     bio: str | None = Field(default=None, max_length=2000)
-    interests: list[str] | None = None
-    goals: list[str] | None = None
+    interests: list[str] | None = Field(default=None, max_length=50)
+    goals: list[str] | None = Field(default=None, max_length=20)
+
+    @field_validator("interests", "goals")
+    @classmethod
+    def bound_item_lengths(cls, values: list[str] | None) -> list[str] | None:
+        if values is not None and any(len(value) > 80 for value in values):
+            raise ValueError("profile values are too long")
+        return values
 
 
 class ProfileUser(BaseModel):

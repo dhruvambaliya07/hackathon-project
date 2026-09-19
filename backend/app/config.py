@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     event_relevance_weight: float = Field(0.10, ge=0, le=1, validation_alias="EVENT_RELEVANCE_WEIGHT")
     cors_origins: str = Field(..., validation_alias="CORS_ORIGINS")
     sql_echo: bool = False
+
+    @field_validator("cors_origins")
+    @classmethod
+    def reject_wildcard_cors(cls, value: str) -> str:
+        if "*" in {origin.strip() for origin in value.split(",")}: 
+            raise ValueError("CORS_ORIGINS must list explicit origins")
+        return value
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

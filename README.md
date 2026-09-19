@@ -42,3 +42,7 @@ The seed creates or updates 30 interests, 20 communities, 40 future events, 5 de
 ## Integrated recommendation flow
 
 The recommendation endpoint validates the user, analyzes free-form interest text, persists recognized interests, generates an embedding with a deterministic fallback, retrieves groups and events, calculates hybrid scores, persists recommendation records, and returns evidence-based reasons. Those recommendation IDs feed the icebreaker and feedback endpoints, so interested feedback is reflected in the next profile response. Provider failures return safe API errors or use local deterministic fallbacks; private provider details are never returned.
+
+## Security and performance controls
+
+`CORS_ORIGINS` must contain explicit origins; wildcard credentialed CORS is rejected. Provider-backed endpoints use lightweight per-process request limits, bounded request fields, UUID validation, safe generic errors, and prompt delimiters that mark user text as untrusted data. Recommendations make one analysis call and one embedding call per request, then use bounded vector retrieval and local hybrid scoring; no per-recommendation AI loop is used. Health responses expose only `ok`/`unavailable` database status and the application version.

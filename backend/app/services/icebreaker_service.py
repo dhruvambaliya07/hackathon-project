@@ -29,8 +29,9 @@ class IcebreakerService:
         prompt_context = self._build_prompt_context(target_type, target, target_interests, shared_interests, style)
         try:
             generated = await self.ai_service.generate_icebreaker(prompt_context)
-            if generated.strip():
-                return generated.strip()
+            cleaned = " ".join(generated.split())
+            if 0 < len(cleaned) <= 280:
+                return cleaned
         except Exception:
             pass
         return self._fallback(target_type, target, shared_interests, style)
