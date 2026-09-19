@@ -57,3 +57,21 @@ The deterministic seed creates 34 normalized interests, 20 groups, 40 events, 5 
 ## Frontend rule
 
 Do not expose database credentials or connect directly from the browser. Frontend code must call the API endpoints and use UUIDs returned in API responses.
+
+## PostgreSQL test setup
+
+Docker Compose provides PostgreSQL 16 with database `aatmoday`, user `aatmoday`, and password `aatmoday` on port `5432`. The local test connection string is:
+
+```text
+postgresql+psycopg://aatmoday:aatmoday@localhost:5432/aatmoday
+```
+
+Apply migrations before running PostgreSQL integration tests:
+
+```powershell
+$env:DATABASE_URL = "postgresql+psycopg://aatmoday:aatmoday@localhost:5432/aatmoday"
+alembic upgrade head
+pytest tests/test_catalog_api.py tests/test_end_to_end_flow.py tests/test_profile_feedback_api.py -q
+```
+
+The repository's current PostgreSQL integration test modules contain nine legacy contract assertions that expect an `{data, meta}` response envelope, while the live routes and frontend use direct response bodies. One assertion also expects the previous 30-interest seed; the deterministic seed now contains 34 interests. These are test-contract mismatches, not PostgreSQL compatibility failures, and were left unchanged per the audit requirement not to alter tests merely to force a pass.
