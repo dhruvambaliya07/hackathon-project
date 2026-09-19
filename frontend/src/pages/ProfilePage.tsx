@@ -15,7 +15,6 @@ import { eventService } from '@/services/eventService'
 import { groupService } from '@/services/groupService'
 import { profileInterestOptions, profileService } from '@/services/profileService'
 import { recommendationService } from '@/services/recommendationService'
-import type { InterestProfile } from '@/types'
 
 type ProfileTab = 'saved' | 'events'
 const CalendarIcon = CalendarDays

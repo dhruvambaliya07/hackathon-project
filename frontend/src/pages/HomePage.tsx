@@ -2,7 +2,6 @@ import { useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, ArrowUpRight, BrainCircuit, Check, Compass, MessageCircle, Search, Sparkles, Users, WandSparkles } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { EventCard } from '@/components/common/event-card'
@@ -43,8 +42,8 @@ export function HomePage() {
             <h1 className="heading text-5xl leading-[1.04] sm:text-7xl">Find where you <span className="text-coral">belong.</span></h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-white/65 sm:text-lg">Discover Aatmoday communities and events that match your interests, personality, and goals.</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/discover"><Button size="lg" variant="secondary">Discover My Communities <ArrowRight size={18} /></Button></Link>
-              <Link to="/groups"><Button size="lg" className="border border-white/20 bg-white/10 text-white hover:bg-white/20">Explore Communities</Button></Link>
+              <Link to="/discover" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-sun px-6 text-base font-bold text-ink shadow-soft transition hover:-translate-y-0.5 hover:bg-sun/80">Discover My Communities <ArrowRight size={18} /></Link>
+              <Link to="/groups" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 text-base font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/20">Explore Communities</Link>
             </div>
             <div className="mt-10 flex items-center gap-3 text-sm text-white/55"><div className="flex -space-x-2"><SafeImage className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=32" alt="Student" /><SafeImage className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=47" alt="Student" /><SafeImage className="h-8 w-8 rounded-full border-2 border-ink object-cover" src="https://i.pravatar.cc/80?img=49" alt="Student" /></div><span>Join 1,800+ students finding their people</span></div>
           </div>
@@ -72,7 +71,7 @@ export function HomePage() {
 
       <section className="pb-20 sm:pb-24"><div className="mb-7 flex items-end justify-between"><div><p className="eyebrow mb-2 text-coral">Make a plan</p><h2 className="heading text-3xl sm:text-4xl">Upcoming events</h2></div><Link to="/events" className="hidden items-center gap-2 text-sm font-extrabold text-coral sm:flex">See all events <ArrowRight size={16} /></Link></div><div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{events.slice(0, 3).map((event) => <EventCard key={event.id} event={event} />)}</div></section>
 
-      <section className="relative overflow-hidden rounded-[2rem] bg-coral px-6 py-14 text-white sm:px-12 sm:py-16"><div className="absolute right-8 top-8 opacity-20"><BrainCircuit size={120} strokeWidth={1} /></div><div className="relative max-w-xl"><p className="eyebrow text-white/65">Your next chapter starts here</p><h2 className="heading mt-3 text-4xl sm:text-5xl">Your next community is waiting.</h2><p className="mt-5 max-w-lg text-sm leading-6 text-white/75 sm:text-base">There is a room for every version of you. All you have to do is open the door.</p><Link to="/discover" className="mt-8 inline-block"><Button size="lg" variant="secondary">Start Discovering <ArrowUpRight size={18} /></Button></Link></div></section>
+      <section className="relative overflow-hidden rounded-[2rem] bg-coral px-6 py-14 text-white sm:px-12 sm:py-16"><div className="absolute right-8 top-8 opacity-20"><BrainCircuit size={120} strokeWidth={1} /></div><div className="relative max-w-xl"><p className="eyebrow text-white/65">Your next chapter starts here</p><h2 className="heading mt-3 text-4xl sm:text-5xl">Your next community is waiting.</h2><p className="mt-5 max-w-lg text-sm leading-6 text-white/75 sm:text-base">There is a room for every version of you. All you have to do is open the door.</p><Link to="/discover" className="mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-sun px-6 text-base font-bold text-ink transition hover:-translate-y-0.5 hover:bg-sun/80">Start Discovering <ArrowUpRight size={18} /></Link></div></section>
     </PageContainer>
   </>
 }

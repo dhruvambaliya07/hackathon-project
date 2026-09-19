@@ -49,6 +49,8 @@ Shared UX resilience includes skeleton loading with slow-network guidance, human
 
 The responsive and accessibility pass covers 320px through 1440px layouts, visible keyboard focus, reduced-motion support, mobile dialog sizing, one-hand navigation targets, semantic route content, labeled controls, and no horizontal overflow across the verified routes.
 
+Production checks are available through `npm run typecheck`, `npm run lint`, and `npm run build`. Routed pages are lazy-loaded so the initial bundle does not eagerly include every view.
+
 ## Backend integration status
 
 This checkout currently contains no FastAPI application, OpenAPI document, routes, or Pydantic schemas to inspect. Because no endpoint could be confirmed, the feature services keep their mock implementations isolated and do not make speculative network requests. Set `VITE_API_BASE_URL` when the backend is added, then map confirmed schemas in the service modules before enabling calls.
