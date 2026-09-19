@@ -75,6 +75,15 @@ export interface Icebreaker {
   context: string
 }
 
+export type IcebreakerStyle = 'casual' | 'friendly' | 'professional'
+
+export interface IcebreakerRequest {
+  interests: string[]
+  community: string
+  event?: string
+  style: IcebreakerStyle
+}
+
 export interface Recommendation {
   id: string
   type: 'group' | 'event'

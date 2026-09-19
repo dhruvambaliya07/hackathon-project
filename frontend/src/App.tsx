@@ -7,7 +7,7 @@ import { RecommendationsPage } from '@/pages/RecommendationsPage'
 import { GroupsPage } from '@/pages/GroupsPage'
 import { EventsPage } from '@/pages/EventsPage'
 import { ProfilePage } from '@/pages/ProfilePage'
-import { GroupDetailPage } from '@/pages/DetailPages'
+import { GroupDetailPage } from '@/pages/GroupDetailPage'
 import { EventDetailPage } from '@/pages/EventDetailPage'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: 1 } } })
