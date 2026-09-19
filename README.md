@@ -18,3 +18,13 @@ pytest
 alembic downgrade base
 alembic upgrade head
 ```
+
+## Deterministic seed data
+
+After applying migrations, run the local seed command from `backend/`:
+
+```bash
+python -m app.seed
+```
+
+The seed creates or updates 30 interests, 20 communities, 40 future events, 5 demo users, 100 group-interest links, 160 event-interest links, and 25 user-interest links. IDs are stable UUID5 values, so running the command repeatedly does not create duplicates. No external API or embedding service is used; embedding columns remain nullable until the recommendation pipeline generates embeddings.
