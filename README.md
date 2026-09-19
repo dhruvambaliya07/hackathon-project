@@ -28,3 +28,7 @@ python -m app.seed
 ```
 
 The seed creates or updates 30 interests, 20 communities, 40 future events, 5 demo users, 100 group-interest links, 160 event-interest links, and 25 user-interest links. IDs are stable UUID5 values, so running the command repeatedly does not create duplicates. It also writes stable local 1536-dimensional vectors for groups and events; production embedding providers can replace these during a coordinated indexing process.
+
+## Personalized icebreakers
+
+`POST /api/v1/icebreakers` accepts `user_id`, `target_type` (`group` or `event`), `target_id`, and `style` (`casual`, `friendly`, or `professional`). The response contains one short icebreaker. The backend uses only the user's interest names and public target details; provider failures use a deterministic template.

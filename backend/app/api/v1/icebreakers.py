@@ -1,13 +1,24 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
+from app.api.v1.interests import get_ai_service
+from app.db.session import get_db
 from app.schemas.common import ApiResponse
 from app.schemas.icebreakers import IcebreakerRequest, IcebreakerResult
-from app.services.icebreaker_service import IcebreakerService
+from app.services.ai_service import AIService
+from app.services.icebreaker_service import IcebreakerService, IcebreakerTargetNotFound
 
 router = APIRouter()
 
 
-@router.post("", response_model=ApiResponse[IcebreakerResult], summary="Generate conversation icebreakers")
-async def create_icebreakers(request: IcebreakerRequest, service: IcebreakerService = Depends(IcebreakerService)) -> ApiResponse[IcebreakerResult]:
-    prompts = await service.generate(request.user_id, request.group_id, request.event_id, request.context)
-    return ApiResponse(data=IcebreakerResult(prompts=prompts))
+def get_icebreaker_service(session: Session = Depends(get_db), ai_service: AIService = Depends(get_ai_service)) -> IcebreakerService:
+    return IcebreakerService(session, ai_service)
+
+
+@router.post("", response_model=ApiResponse[IcebreakerResult], summary="Generate a personalized conversation icebreaker")
+async def create_icebreaker(request: IcebreakerRequest, service: IcebreakerService = Depends(get_icebreaker_service)) -> ApiResponse[IcebreakerResult]:
+    try:
+        icebreaker = await service.generate(request.user_id, request.target_type, request.target_id, request.style)
+    except IcebreakerTargetNotFound as exc:
+        raise HTTPException(status_code=404, detail="Icebreaker target or user was not found") from exc
+    return ApiResponse(data=IcebreakerResult(icebreaker=icebreaker, style=request.style))

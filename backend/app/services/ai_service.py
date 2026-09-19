@@ -79,6 +79,10 @@ class AIProvider(Protocol):
     async def complete(self, prompt: str) -> str: ...
 
 
+class AIService(Protocol):
+    async def generate_icebreaker(self, context: str) -> str: ...
+
+
 class OpenAICompatibleProvider:
     def __init__(self, settings: Settings | None = None) -> None:
         self.settings = settings or get_settings()
