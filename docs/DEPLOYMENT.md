@@ -46,7 +46,7 @@ VITE_API_MODE=api
 VITE_DEMO_USER_ID=89d4a21e-b315-515f-8ff3-80b56e85ed6c
 ```
 
-Use `VITE_API_MODE=mock` to keep deterministic local data without a backend. The default mode is mock.
+Use `VITE_API_MODE=mock` to keep deterministic local data without a backend. The default mode is API.
 
 The centralized frontend services select the API or mock adapter at startup. Components should continue calling the services rather than `fetch` directly:
 
@@ -58,11 +58,11 @@ The centralized frontend services select the API or mock adapter at startup. Com
 6. Feedback buttons -> `POST /feedback` using the persisted recommendation `id` and one allowed feedback type.
 7. Analysis-only UI -> `POST /interests/analyze` with `{ text }`.
 
-Every call must unwrap `payload.data`; on failure display a generic message and preserve the returned HTTP status for retry/duplicate handling. Keep the UUID user ID in application state; there is no authentication endpoint in this submission.
+The frontend accepts the live direct response bodies and also contains compatibility handling for an optional envelope. On failure display a generic message and preserve the returned HTTP status for retry/duplicate handling. Keep the UUID user ID in application state; there is no authentication endpoint in this submission.
 
 ## Checks run
 
-Backend: `pytest` completed with 41 passed and 12 PostgreSQL-gated skips in the local test environment. Frontend `npm run lint`, `npm run typecheck`, and `npm run build` passed. Backend Docker image build passed. Coverage was not available because `pytest-cov` is not installed.
+Frontend `npm run lint`, `npm run typecheck`, and `npm run build` passed in the current workspace. The backend test command could not be run in the current `.venv` because `pytest` is not installed there. No committed artifact verifies an exact historical backend count, Docker build result, or coverage result.
 
 ## Limitations
 

@@ -25,7 +25,7 @@ The central sentence is:
 
 > The student gives us their words; the system turns them into understanding, a transparent match, and a first sentence to start connecting.
 
-## 2. If Gemini Succeeds
+## 2. If the AI provider succeeds
 
 Continue normally. In the profile, the source is `ai`. Explain that:
 
@@ -34,9 +34,9 @@ Continue normally. In the profile, the source is `ai`. Explain that:
 - categories are derived from the controlled vocabulary,
 - the backend then ranks communities and events from the structured signals.
 
-Do not claim that Gemini computes the recommendation score. The backend matching service owns that score.
+Do not claim that the AI provider computes the recommendation score. The backend matching service owns that score.
 
-## 3. If Gemini Returns HTTP 503
+## 3. If the AI provider Returns HTTP 503
 
 Do not retry repeatedly and do not change the model during the demo.
 
@@ -99,7 +99,7 @@ docker compose up api
 
 Then start the API-backed frontend with the configuration in **Restart Commands**.
 
-If Gemini is unavailable, use the same seeded flow with fallback. The fallback still uses real API routes and real seeded communities/events. It does not fabricate recommendations. The key judge sequence is:
+If the provider is unavailable, use the same seeded flow with fallback. The fallback still uses real API routes and real seeded communities/events. It does not fabricate recommendations. The key judge sequence is:
 
 `/discover -> Analyze -> Show My Matches -> open a result -> Why you match -> Start a Conversation -> feedback`
 
@@ -113,7 +113,7 @@ Do not invent or manually type a recommendation score, community, event, or iceb
 
 ## 7. Short Judge Explanation About AI Availability
 
-> Gemini is an external dependency and can occasionally return a temporary 503. We designed the product so provider availability does not destroy the user journey: structured interest extraction, embeddings, and icebreakers each have deterministic fallbacks. The demo still shows real API responses, seeded catalog data, backend-owned ranking, and evidence-based explanations. The fallback is a resilience mechanism, not a fake result.
+> The AI provider is an external dependency and can occasionally return a temporary 503. We designed the product so provider availability does not destroy the user journey: structured interest extraction, embeddings, and icebreakers each have deterministic fallbacks. The demo still shows real API responses, seeded catalog data, backend-owned ranking, and evidence-based explanations. The fallback is a resilience mechanism, not a fake result.
 
 ## 8. Restart Commands
 
@@ -185,7 +185,7 @@ Closing line:
 
 ## What Not To Do During the Demo
 
-- Do not repeatedly retry Gemini after a 503.
+- Do not repeatedly retry the provider after a 503.
 - Do not change models or API keys live.
 - Do not switch the real demo to mock mode.
 - Do not invent a score, recommendation, matching reason, or AI response.

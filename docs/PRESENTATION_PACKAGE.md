@@ -162,7 +162,7 @@ Implemented:
 6. Interest aliases are normalized to the controlled vocabulary; categories are derived server-side.
 7. Provider, parsing, or validation failure uses `KeywordFallbackAIService`.
 
-The current configured production model is Gemini through Google's OpenAI-compatible endpoint. Do not promise provider availability; describe fallback as the resilience path.
+The current implementation uses configurable OpenAI-compatible chat and embedding endpoints. The repository does not include a vendor-specific Gemini integration. Do not promise provider availability; describe fallback as the resilience path.
 
 ## 9. Recommendation Architecture
 
@@ -202,13 +202,13 @@ Fallback is deliberately narrow and deterministic:
 - Invalid AI output is rejected rather than trusted.
 - API responses expose a safe `source` marker for interest analysis, not provider internals.
 
-Gemini HTTP 503 high-demand responses are external availability events. They should result in usable fallback behavior, not an architectural change.
+Provider HTTP failures are external availability events. They should result in usable fallback behavior, not an architectural change.
 
 ## 12. Technology Stack
 
 - Frontend: React, TypeScript, Vite, React Router, TanStack React Query, Tailwind CSS, Framer Motion, Lucide icons.
 - Backend: FastAPI, Pydantic, SQLAlchemy, PostgreSQL 16, Alembic, HTTPX.
-- AI integration: OpenAI-compatible HTTP provider configuration for Gemini.
+- AI integration: configurable OpenAI-compatible HTTP chat and embedding providers.
 - Testing: Pytest, deterministic provider doubles, SQLite tests, PostgreSQL integration tests.
 - Deployment support: Docker Compose for PostgreSQL and backend startup.
 
@@ -251,7 +251,7 @@ A: No. The backend matching service calculates the hybrid score and returns it. 
 **Q: What makes the explanation trustworthy?**  
 A: It is generated from the same scoring evidence: normalized matched interests, compatible goals, semantic relevance, and event/group context. It does not invent user attributes.
 
-**Q: What happens if Gemini is unavailable?**  
+**Q: What happens if the AI provider is unavailable?**
 A: Interest analysis falls back to deterministic keyword matching, embeddings use a deterministic fallback, and icebreakers use a deterministic template based on real shared interests and target data.
 
 **Q: Does every recommendation trigger an AI call?**  

@@ -1,77 +1,88 @@
 # Database
 
-## Engine
+## Engine and storage
 
-- PostgreSQL 16
-- SQLAlchemy 2.x
-- Alembic migrations
-- Fixed embedding dimension: 1536
+The application uses PostgreSQL 16 through SQLAlchemy 2 and Psycopg 3. Alembic manages schema changes. The embedding dimension is fixed at 1536.
 
-## Tables
+There is no pgvector extension, vector column, or vector index. Group and event embeddings are nullable JSON arrays. Recommendation ranking runs in application code.
 
-- `users`: public profile, persisted goals/traits, timestamps
-- `interests`: canonical interest vocabulary
-- `user_interests`: user-interest weights and source
-- `groups`: community metadata and nullable vector embedding
-- `group_interests`: group-interest links and weights
-- `events`: event metadata and nullable vector embedding
-- `event_interests`: event-interest links and weights
-- `recommendations`: user-owned ranked recommendation records
-- `feedback`: user feedback and recommendation target state
+## Tables and important fields
 
-## Migration lifecycle
+- `users`: UUID, name, unique email, avatar URL, bio, JSON goals and traits, timestamps.
+- `interests`: UUID, unique canonical name, category, timestamp.
+- `user_interests`: composite user/interest key, weight, source, timestamp.
+- `groups`: UUID, name, description, category, location, meeting frequency, member count, optional JSON embedding, timestamps.
+- `group_interests`: composite group/interest key and bounded weight.
+- `events`: UUID, group ID, name, description, start/end times, location, capacity, optional JSON embedding, timestamps.
+- `event_interests`: composite event/interest key and bounded weight.
+- `recommendations`: UUID, user ID, target type/ID, score from 0 to 1, JSON reason, timestamp.
+- `feedback`: UUID, user ID, nullable recommendation ID, target type/ID, feedback type, timestamp.
 
-Current head: `0002_profile_feedback_state`.
+## Relationships
 
-- `0001_initial`: base schema, foreign keys, checks, indexes, and optional JSON embedding columns
-- `0002_profile_feedback_state`: user goals/traits and duplicate feedback constraint
+- A user has many `user_interests`, recommendations, and feedback records.
+- An interest can be linked to users, groups, and events.
+- A group has many group-interest links and events.
+- An event belongs to one group and has many event-interest links.
+- A recommendation belongs to a user. Its `target_type` and `target_id` are an application-level pair; there is no polymorphic foreign key to groups/events.
+- Feedback belongs to a user and optionally references a recommendation. Deleting a recommendation sets that reference to `NULL`.
+- User, group, event, and interest links cascade on parent deletion.
 
-Clean verification uses the standard `postgres:16` image; upgrade from an empty database reaches `0002_profile_feedback_state` without requiring a database extension.
+## Constraints and indexes
 
-## Integrity and indexes
+Important constraints include unique user email, unique interest name, composite link keys, bounded weights, recommendation score range, nonnegative group member counts and event capacities, valid event end times, and unique `(user_id, recommendation_id, feedback_type)` feedback.
 
-Foreign keys protect user, recommendation, interest, group, and event link ownership. Check constraints bound scores, weights, counts, capacities, and event dates. Unique constraints protect user emails, canonical interests, link pairs, and duplicate feedback.
+Indexes include:
 
-Verified indexes include:
+- `users.email`
+- `interests.name` and `interests.category`
+- `groups.name` and `groups.category`
+- `events.group_id`, `events.name`, and `events.start_time`
+- `recommendations.user_id` and `(target_type, target_id)`
+- `feedback.user_id` and `feedback.recommendation_id`
+- interest IDs in relationship tables
 
-- user email
-- group name/category
-- event name/group/start time
-- recommendation user and target type/target ID
-- feedback user and recommendation
-- interest name/category
-- group/event/user interest link targets
+UUID primary keys support detail lookups.
 
-Primary keys cover UUID lookup for group, event, user, and recommendation detail endpoints.
+## Migrations
 
-## Seed
+The current Alembic head is `0002_profile_feedback_state`.
 
-Run from `backend/` after migration:
+- `0001_initial`: creates the base tables, relationships, constraints, indexes, and JSON embedding columns.
+- `0002_profile_feedback_state`: adds JSON `users.goals` and `users.traits`, then prevents duplicate feedback for the same user, recommendation, and feedback type.
+
+Apply migrations from `backend/` with `alembic upgrade head`.
+
+## Seed data
+
+Run:
 
 ```powershell
 python -m app.seed
 ```
 
-The deterministic seed creates 34 normalized interests, 20 groups, 40 events, 5 users, 100 group-interest links, 160 event-interest links, and 25 user-interest links. Every group has explicit goal metadata used by recommendation ranking. Event dates begin at the fixed future anchor `2026-10-05` rather than using the current date, so repeated runs produce the same schedule. UUID5 identifiers and upsert behavior make repeated runs idempotent; this was verified by running the seed twice against SQLite.
+The deterministic seed creates or updates:
 
-## Frontend rule
+- 34 interests
+- 20 groups
+- 40 future events
+- 5 users
+- 100 group-interest links
+- 160 event-interest links
+- 25 user-interest links
 
-Do not expose database credentials or connect directly from the browser. Frontend code must call the API endpoints and use UUIDs returned in API responses.
+It uses stable UUID5 identifiers and upsert behavior, so repeated runs are intended to be idempotent. The seeded event schedule starts at `2026-10-05`. Group goal metadata used in matching is held in Python (`GROUP_GOALS`), not in a separate database table.
 
-## PostgreSQL test setup
+## Local PostgreSQL
 
-Docker Compose provides PostgreSQL 16 with database `aatmoday`, user `aatmoday`, and password `aatmoday` on port `5432`. The local test connection string is:
+Docker Compose starts PostgreSQL with:
 
 ```text
-postgresql+psycopg://aatmoday:aatmoday@localhost:5432/aatmoday
+Database: aatmoday
+User: aatmoday
+Password: aatmoday
+Port: 5432
+URL: postgresql+psycopg://aatmoday:aatmoday@localhost:5432/aatmoday
 ```
 
-Apply migrations before running PostgreSQL integration tests:
-
-```powershell
-$env:DATABASE_URL = "postgresql+psycopg://aatmoday:aatmoday@localhost:5432/aatmoday"
-alembic upgrade head
-pytest tests/test_catalog_api.py tests/test_end_to_end_flow.py tests/test_profile_feedback_api.py -q
-```
-
-The repository's current PostgreSQL integration test modules contain nine legacy contract assertions that expect an `{data, meta}` response envelope, while the live routes and frontend use direct response bodies. One assertion also expects the previous 30-interest seed; the deterministic seed now contains 34 interests. These are test-contract mismatches, not PostgreSQL compatibility failures, and were left unchanged per the audit requirement not to alter tests merely to force a pass.
+These are local development credentials only. Do not reuse them for production.

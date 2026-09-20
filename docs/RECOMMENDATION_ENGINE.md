@@ -39,4 +39,4 @@ An empty candidate set returns a successful response with an empty recommendatio
 
 ## Frontend consumption
 
-Use `data.recommendations`, render `reasons` and `explanation`, and retain `id`, `target_type`, and `target_id` for icebreakers and feedback. Do not reconstruct recommendation IDs from target IDs.
+Use the direct response body's `recommendations` array, render `reasons` and `explanation`, and retain `id`, `target_type`, and `target_id` for icebreakers and feedback. The frontend client also tolerates an optional legacy envelope, but the live backend returns direct bodies. Do not reconstruct recommendation IDs from target IDs.
