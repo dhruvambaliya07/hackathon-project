@@ -27,7 +27,7 @@ export class ApiClientError extends Error {
 
 function readBaseUrl() {
   const configuredUrl = import.meta.env.VITE_API_BASE_URL?.trim()
-  return configuredUrl ? configuredUrl.replace(/\/$/, '') : ''
+  return configuredUrl ? configuredUrl.replace(/\/$/, '') : 'http://localhost:8000/api/v1'
 }
 
 export class ApiClient {

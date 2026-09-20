@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { ArrowRight, ArrowUpRight, BrainCircuit, Check, Compass, MessageCircle, Search, Sparkles, Users, WandSparkles } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -7,13 +8,18 @@ import { Card } from '@/components/ui/card'
 import { EventCard } from '@/components/common/event-card'
 import { GroupCard } from '@/components/common/group-card'
 import { PageContainer } from '@/components/common/page-container'
+import { LoadingState } from '@/components/common/states'
 import { SafeImage } from '@/components/common/SafeImage'
 import { events, groups } from '@/data/mockData'
+import { apiMode } from '@/config/runtime'
+import { eventService } from '@/services/eventService'
+import { groupService } from '@/services/groupService'
 
 const benefits = [
-  { icon: MessageCircle, number: '01', title: 'Tell us naturally', detail: 'AI understands your interests', color: 'bg-coral text-white' },
-  { icon: Compass, number: '02', title: 'Discover relevant communities', detail: 'Find groups and events that actually match', color: 'bg-mint text-white' },
-  { icon: Users, number: '03', title: 'Start conversations', detail: 'Get personalized icebreakers', color: 'bg-sun text-ink' },
+  { icon: MessageCircle, number: '01', title: 'Describe naturally', detail: 'Share what you are into, in your own words.', color: 'bg-coral text-white' },
+  { icon: Compass, number: '02', title: 'Discover your fit', detail: 'Find communities and events shaped around you.', color: 'bg-mint text-white' },
+  { icon: Check, number: '03', title: 'See why it matches', detail: 'Follow the interests and goals behind every recommendation.', color: 'bg-sky text-white' },
+  { icon: Users, number: '04', title: 'Start connecting', detail: 'Get a natural icebreaker for the first hello.', color: 'bg-sun text-ink' },
 ]
 
 const steps = [
@@ -25,10 +31,15 @@ const steps = [
 export function HomePage() {
   const navigate = useNavigate()
   const [interest, setInterest] = useState('')
+  const groupsQuery = useQuery({ queryKey: ['home-groups'], queryFn: groupService.list, enabled: apiMode === 'api' })
+  const eventsQuery = useQuery({ queryKey: ['home-events'], queryFn: eventService.list, enabled: apiMode === 'api' })
+  const featuredGroups = apiMode === 'api' ? groupsQuery.data?.slice(0, 2) ?? [] : groups.slice(0, 2)
+  const featuredEvents = apiMode === 'api' ? eventsQuery.data?.slice(0, 3) ?? [] : events.slice(0, 3)
+  const featuredLoading = apiMode === 'api' && (groupsQuery.isPending || eventsQuery.isPending)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    navigate('/discover')
+    navigate('/discover', { state: { description: interest.trim() } })
   }
 
   return <>
@@ -63,13 +74,13 @@ export function HomePage() {
         </form>
       </motion.section>
 
-      <section className="py-20 sm:py-24"><div className="mb-10 max-w-xl"><p className="eyebrow mb-3 text-coral">Less scrolling, more belonging</p><h2 className="heading text-3xl sm:text-4xl">A more human way to find your next thing.</h2></div><div className="grid gap-4 md:grid-cols-3">{benefits.map(({ icon: Icon, number, title, detail, color }) => <Card key={number} className="border-0 p-6 shadow-soft"><div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color}`}><Icon size={20} /></div><p className="mt-8 text-xs font-extrabold tracking-widest text-ink/35">{number}</p><h3 className="heading mt-2 text-xl">{title}</h3><p className="mt-2 text-sm leading-6 text-ink/55">{detail}</p></Card>)}</div></section>
+      <section className="py-20 sm:py-24"><div className="mb-10 max-w-xl"><p className="eyebrow mb-3 text-coral">Less scrolling, more belonging</p><h2 className="heading text-3xl sm:text-4xl">From your words to your next hello.</h2></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{benefits.map(({ icon: Icon, number, title, detail, color }) => <Card key={number} className="border-0 p-6 shadow-soft"><div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color}`}><Icon size={20} /></div><p className="mt-8 text-xs font-extrabold tracking-widest text-ink/35">{number}</p><h3 className="heading mt-2 text-xl">{title}</h3><p className="mt-2 text-sm leading-6 text-ink/55">{detail}</p></Card>)}</div></section>
 
       <section className="border-t border-line py-20 sm:py-24"><div className="grid gap-12 lg:grid-cols-[0.7fr_1fr]"><div><p className="eyebrow mb-3 text-coral">How it works</p><h2 className="heading max-w-sm text-3xl sm:text-4xl">From “maybe someday” to “see you there.”</h2><p className="mt-5 max-w-sm text-sm leading-6 text-ink/55">The good stuff is usually one honest answer away.</p></div><div className="grid gap-8">{steps.map(({ title, detail, icon: Icon }, index) => <div key={title} className="flex gap-5"><div className="relative flex flex-col items-center"><div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-ink text-white"><Icon size={20} /></div>{index < steps.length - 1 && <div className="mt-2 h-full w-px bg-line" />}</div><div className="pb-3"><p className="text-xs font-extrabold uppercase tracking-widest text-coral">0{index + 1}</p><h3 className="heading mt-1 text-2xl">{title}</h3><p className="mt-2 max-w-lg text-sm leading-6 text-ink/55">{detail}</p></div></div>)}</div></div></section>
 
-      <section className="pb-20 sm:pb-24"><div className="mb-7 flex items-end justify-between"><div><p className="eyebrow mb-2 text-coral">Find your people</p><h2 className="heading text-3xl sm:text-4xl">Featured communities</h2></div><Link to="/groups" className="hidden items-center gap-2 text-sm font-extrabold text-coral sm:flex">View all <ArrowRight size={16} /></Link></div><div className="grid gap-5 md:grid-cols-2">{groups.slice(0, 2).map((group) => <GroupCard key={group.id} group={group} />)}</div></section>
+      <section className="pb-20 sm:pb-24"><div className="mb-7 flex items-end justify-between"><div><p className="eyebrow mb-2 text-coral">Find your people</p><h2 className="heading text-3xl sm:text-4xl">Featured communities</h2></div><Link to="/groups" className="hidden items-center gap-2 text-sm font-extrabold text-coral sm:flex">View all <ArrowRight size={16} /></Link></div>{featuredLoading ? <LoadingState label="Loading communities..." /> : <div className="grid gap-5 md:grid-cols-2">{featuredGroups.map((group) => <GroupCard key={group.id} group={group} />)}</div>}</section>
 
-      <section className="pb-20 sm:pb-24"><div className="mb-7 flex items-end justify-between"><div><p className="eyebrow mb-2 text-coral">Make a plan</p><h2 className="heading text-3xl sm:text-4xl">Upcoming events</h2></div><Link to="/events" className="hidden items-center gap-2 text-sm font-extrabold text-coral sm:flex">See all events <ArrowRight size={16} /></Link></div><div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{events.slice(0, 3).map((event) => <EventCard key={event.id} event={event} />)}</div></section>
+      <section className="pb-20 sm:pb-24"><div className="mb-7 flex items-end justify-between"><div><p className="eyebrow mb-2 text-coral">Make a plan</p><h2 className="heading text-3xl sm:text-4xl">Upcoming events</h2></div><Link to="/events" className="hidden items-center gap-2 text-sm font-extrabold text-coral sm:flex">See all events <ArrowRight size={16} /></Link></div>{featuredLoading ? <LoadingState label="Loading events..." /> : <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{featuredEvents.map((event) => <EventCard key={event.id} event={event} />)}</div>}</section>
 
       <section className="relative overflow-hidden rounded-[2rem] bg-coral px-6 py-14 text-white sm:px-12 sm:py-16"><div className="absolute right-8 top-8 opacity-20"><BrainCircuit size={120} strokeWidth={1} /></div><div className="relative max-w-xl"><p className="eyebrow text-white/65">Your next chapter starts here</p><h2 className="heading mt-3 text-4xl sm:text-5xl">Your next community is waiting.</h2><p className="mt-5 max-w-lg text-sm leading-6 text-white/75 sm:text-base">There is a room for every version of you. All you have to do is open the door.</p><Link to="/discover" className="mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-sun px-6 text-base font-bold text-ink transition hover:-translate-y-0.5 hover:bg-sun/80">Start Discovering <ArrowUpRight size={18} /></Link></div></section>
     </PageContainer>

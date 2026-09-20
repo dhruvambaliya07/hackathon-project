@@ -31,6 +31,7 @@ export interface InterestProfile {
   signals: InterestSignal[]
   goals: string[]
   traits: string[]
+  preferences?: string[]
   explanation: string
   updatedAt: string
 }

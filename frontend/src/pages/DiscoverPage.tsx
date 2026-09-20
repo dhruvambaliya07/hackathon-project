@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { AlertCircle, ArrowLeft, ArrowRight, Check, ChevronRight, CircleHelp, LoaderCircle, RefreshCw, Sparkles, Target, Users, WandSparkles } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -11,10 +11,10 @@ import { interestService } from '@/services/interestService'
 import type { InterestProfile } from '@/types'
 
 const suggestions = [
-  'I love photography and filmmaking...',
-  'I enjoy coding and building things...',
-  'I like music, dance and meeting new people...',
-  "I'm interested in entrepreneurship and finance...",
+  'I love photography, technology and meeting new people.',
+  "I'm interested in AI, startups and building projects.",
+  'I enjoy music, design and creative activities.',
+  'I want to practice public speaking and organize events.',
 ]
 
 const analysisSteps = ['Understanding your interests...', 'Finding communities...', 'Building your recommendations...']
@@ -23,7 +23,9 @@ type DiscoverStage = 'form' | 'analyzing' | 'profile' | 'error'
 
 export function DiscoverPage() {
   const navigate = useNavigate()
-  const [description, setDescription] = useState('')
+  const location = useLocation()
+  const initialDescription = typeof location.state === 'object' && location.state !== null && 'description' in location.state && typeof location.state.description === 'string' ? location.state.description : ''
+  const [description, setDescription] = useState(initialDescription)
   const [stage, setStage] = useState<DiscoverStage>('form')
   const [analysisStep, setAnalysisStep] = useState(0)
   const [profile, setProfile] = useState<InterestProfile | null>(null)
