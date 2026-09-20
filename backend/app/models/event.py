@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, func
+from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Integer, JSON, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -35,12 +35,11 @@ class Event(Base):
 class EventInterest(Base):
     __tablename__ = "event_interests"
     __table_args__ = (
-        UniqueConstraint("event_id", "interest_id", name="uq_event_interests_event_interest"),
         CheckConstraint("weight >= 0 AND weight <= 1", name="ck_event_interests_weight_range"),
     )
 
     event_id: Mapped[UUID] = mapped_column(PostgresUUID(as_uuid=True), ForeignKey("events.id", ondelete="CASCADE"), primary_key=True)
-    interest_id: Mapped[UUID] = mapped_column(PostgresUUID(as_uuid=True), ForeignKey("interests.id", ondelete="CASCADE"), primary_key=True)
+    interest_id: Mapped[UUID] = mapped_column(PostgresUUID(as_uuid=True), ForeignKey("interests.id", ondelete="CASCADE"), primary_key=True, index=True)
     weight: Mapped[float] = mapped_column(Float, nullable=False, default=1.0, server_default="1")
 
     event: Mapped["Event"] = relationship(back_populates="interests")

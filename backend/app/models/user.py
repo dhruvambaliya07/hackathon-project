@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, JSON, String, Text, func
+from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Index, JSON, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -10,10 +10,14 @@ from app.db.base import Base
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        UniqueConstraint("email", name="uq_users_email"),
+        Index("ix_users_email", "email"),
+    )
 
     id: Mapped[UUID] = mapped_column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(160), nullable=False)
-    email: Mapped[str] = mapped_column(String(320), nullable=False, unique=True, index=True)
+    email: Mapped[str] = mapped_column(String(320), nullable=False, unique=True)
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
     goals: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list, server_default="[]")
@@ -31,7 +35,7 @@ class UserInterest(Base):
     __table_args__ = (CheckConstraint("weight >= 0 AND weight <= 1", name="ck_user_interests_weight_range"),)
 
     user_id: Mapped[UUID] = mapped_column(PostgresUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
-    interest_id: Mapped[UUID] = mapped_column(PostgresUUID(as_uuid=True), ForeignKey("interests.id", ondelete="CASCADE"), primary_key=True)
+    interest_id: Mapped[UUID] = mapped_column(PostgresUUID(as_uuid=True), ForeignKey("interests.id", ondelete="CASCADE"), primary_key=True, index=True)
     weight: Mapped[float] = mapped_column(Float, nullable=False, default=1.0, server_default="1")
     source: Mapped[str] = mapped_column(String(40), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
