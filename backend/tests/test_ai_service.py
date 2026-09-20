@@ -43,6 +43,19 @@ def test_recoverable_json_wrapper_is_accepted(client: TestClient) -> None:
     assert response.json()["interests"][0]["name"] == "programming"
 
 
+def test_json_code_fence_and_surrounding_whitespace_are_accepted(client: TestClient) -> None:
+    response_body = '  ```json\n{"interests":[{"name":"photography","confidence":0.9}],"goals":["create"]}\n```  '
+    service = StructuredAIService(FakeProvider(response_body))
+    app.dependency_overrides[get_ai_service] = lambda: service
+
+    response = client.post("/api/v1/interests/analyze", json={"text": "I enjoy photography"})
+
+    assert response.status_code == 200
+    assert response.json()["source"] == "ai"
+    assert response.json()["interests"][0]["name"] == "photography"
+    assert response.json()["goals"] == ["create"]
+
+
 def test_ai_response_is_canonicalized_and_deduplicated(client: TestClient) -> None:
     service = StructuredAIService(FakeProvider(
         '{"interests":[{"name":"taking photos","confidence":0.7},{"name":"photography","confidence":0.95},{"name":"making reels","confidence":0.8}],"goals":["meet_people","meet_people"],"traits":["social"],"preferences":["beginner friendly"]}'
@@ -82,6 +95,26 @@ def test_invalid_provider_schema_uses_keyword_fallback(client: TestClient) -> No
     service = StructuredAIService(FakeProvider('{"interests":[{"name":"photography","confidence":"certain"}]}'))
     app.dependency_overrides[get_ai_service] = lambda: service
     response = client.post("/api/v1/interests/analyze", json={"text": "I enjoy photography"})
+    assert response.status_code == 200
+    assert response.json()["source"] == "fallback"
+    assert response.json()["interests"][0]["name"] == "photography"
+
+
+@pytest.mark.parametrize(
+    "provider_response",
+    [
+        '{"interests":[{"confidence":0.8}]}',
+        '{"interests":[{"name":"photography","confidence":"certain"}]}',
+        '{"interests":[],"unexpected":"field"}',
+        '{"interests":[]} trailing text {"goals":["learn"]}',
+    ],
+)
+def test_invalid_or_ambiguous_structured_output_uses_fallback(client: TestClient, provider_response: str) -> None:
+    service = StructuredAIService(FakeProvider(provider_response))
+    app.dependency_overrides[get_ai_service] = lambda: service
+
+    response = client.post("/api/v1/interests/analyze", json={"text": "I enjoy photography"})
+
     assert response.status_code == 200
     assert response.json()["source"] == "fallback"
     assert response.json()["interests"][0]["name"] == "photography"

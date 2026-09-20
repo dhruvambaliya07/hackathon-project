@@ -2,7 +2,7 @@
 
 ## Interest extraction
 
-`POST /api/v1/interests/analyze` sends one analysis request for free-form interest text through `StructuredAIService`. The provider payload is first validated with the Pydantic `AIInterestAnalysis` schema, then aliases are normalized to the controlled vocabulary and duplicate interests keep their highest confidence. Only allowed goals, traits, and preferences are accepted; unknown interests are discarded.
+`POST /api/v1/interests/analyze` sends one analysis request for free-form interest text through `StructuredAIService`. Analysis requests ask the OpenAI-compatible provider for JSON output with a 2048-token budget. The response is accepted as raw JSON, a complete JSON Markdown fence, or one unambiguous JSON object surrounded by text; incomplete or ambiguous output is rejected. The provider payload is then validated with the strict Pydantic `AIInterestAnalysis` schema, aliases are normalized to the controlled vocabulary, and duplicate interests keep their highest confidence. Categories are derived server-side from the controlled vocabulary rather than trusted from model output. Only allowed goals, traits, and preferences are accepted; unknown interests are discarded.
 
 If the provider times out, fails, or returns malformed structured output, `KeywordFallbackAIService` performs deterministic keyword matching. The API exposes only the normalized analysis and its `ai` or `fallback` source marker; provider errors and implementation details are never returned.
 
